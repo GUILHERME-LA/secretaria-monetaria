@@ -8,6 +8,7 @@ import { Card } from "./ui/Card";
 import { Button } from "./ui/Button";
 import { Modal } from "./ui/Modal";
 import { TransactionForm } from "./TransactionForm";
+import { Textarea } from "./ui/Textarea";
 import { Pencil, Trash2, Check } from "lucide-react";
 
 type Props = {
@@ -20,6 +21,8 @@ export function TransactionList({ month, refreshKey, currentMonth }: Props) {
   const supabase = createClient();
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [editItem, setEditItem] = useState<Transacao | null>(null);
+  const [deleteItem, setDeleteItem] = useState<Transacao | null>(null);
+  const [deleteJustificativa, setDeleteJustificativa] = useState("");
 
   const load = useCallback(async () => {
     const [ano, mes] = month.split("-").map(Number);
@@ -55,9 +58,33 @@ export function TransactionList({ month, refreshKey, currentMonth }: Props) {
     load();
   }
 
-  async function excluir(id: string) {
-    if (!confirm("Excluir esta transação?")) return;
-    await supabase.from("sm_transacoes").delete().eq("id", id);
+  async function confirmarExclusao() {
+    if (!deleteItem || !deleteJustificativa.trim()) return;
+
+    const { data: atual } = await supabase
+      .from("sm_transacoes")
+      .select("*")
+      .eq("id", deleteItem.id)
+      .single();
+
+    await supabase.from("sm_auditoria").insert({
+      transacao_id: deleteItem.id,
+      acao: "exclusao",
+      justificativa: deleteJustificativa.trim(),
+      dados_anteriores: atual ? {
+        tipo: atual.tipo,
+        categoria_id: atual.categoria_id,
+        descricao: atual.descricao,
+        valor: Number(atual.valor),
+        data: atual.data,
+        status: atual.status,
+      } : null,
+      dados_novos: null,
+    });
+
+    await supabase.from("sm_transacoes").delete().eq("id", deleteItem.id);
+    setDeleteItem(null);
+    setDeleteJustificativa("");
     load();
   }
 
@@ -133,7 +160,7 @@ export function TransactionList({ month, refreshKey, currentMonth }: Props) {
                   <Pencil size={16} />
                 </button>
                 <button
-                  onClick={() => excluir(t.id)}
+                  onClick={() => { setDeleteItem(t); setDeleteJustificativa(""); }}
                   className="cursor-pointer rounded p-2 text-[var(--muted-foreground)] hover:bg-red-500/10 hover:text-red-500 transition-colors"
                 >
                   <Trash2 size={16} />
@@ -170,6 +197,44 @@ export function TransactionList({ month, refreshKey, currentMonth }: Props) {
             }}
             currentMonth={currentMonth}
           />
+        )}
+      </Modal>
+
+      <Modal
+        open={!!deleteItem}
+        onClose={() => setDeleteItem(null)}
+        title="Excluir Transação"
+      >
+        {deleteItem && (
+          <div className="flex flex-col gap-4">
+            <p className="text-sm text-[var(--foreground)]">
+              Tem certeza que deseja excluir <strong>{deleteItem.descricao}</strong>?
+            </p>
+            <Textarea
+              label="Justificativa *"
+              placeholder="Por que você está excluindo esta transação?"
+              value={deleteJustificativa}
+              onChange={(e) => setDeleteJustificativa(e.target.value)}
+              required
+            />
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                className="flex-1"
+                onClick={() => setDeleteItem(null)}
+              >
+                Cancelar
+              </Button>
+              <Button
+                variant="danger"
+                className="flex-1"
+                disabled={!deleteJustificativa.trim()}
+                onClick={confirmarExclusao}
+              >
+                Excluir
+              </Button>
+            </div>
+          </div>
         )}
       </Modal>
     </>

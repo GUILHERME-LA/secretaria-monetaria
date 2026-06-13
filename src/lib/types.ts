@@ -46,6 +46,17 @@ export interface Recorrente {
   categoria_cor?: string;
 }
 
+export interface Auditoria {
+  id: string;
+  user_id: string;
+  transacao_id: string | null;
+  acao: "alteracao" | "exclusao";
+  justificativa: string;
+  dados_anteriores: Record<string, any> | null;
+  dados_novos: Record<string, any> | null;
+  created_at: string;
+}
+
 export interface DashboardData {
   totalReceitas: number;
   totalDespesas: number;

@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Settings, Repeat, HelpCircle } from "lucide-react";
+import { LogOut, Settings, Repeat, HelpCircle, History } from "lucide-react";
 import { createClient } from "@/lib/supabase-client";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
@@ -24,21 +24,56 @@ export function Header() {
           <button
             id="tour-recorrentes"
             onClick={() => router.push("/recorrentes")}
-            className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            title="Contas Recorrentes"
+          >
+            <Repeat size={16} /> Recorrentes
+          </button>
+          <button
+            onClick={() => router.push("/recorrentes")}
+            className="sm:hidden cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
             title="Contas Recorrentes"
           >
             <Repeat size={18} />
           </button>
           <button
+            onClick={() => router.push("/auditoria")}
+            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            title="Histórico de Alterações"
+          >
+            <History size={16} /> Histórico
+          </button>
+          <button
+            onClick={() => router.push("/auditoria")}
+            className="sm:hidden cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            title="Histórico de Alterações"
+          >
+            <History size={18} />
+          </button>
+          <button
             onClick={() => router.push("/ajuda")}
-            className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            title="Ajuda"
+          >
+            <HelpCircle size={16} /> Ajuda
+          </button>
+          <button
+            onClick={() => router.push("/ajuda")}
+            className="sm:hidden cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
             title="Ajuda"
           >
             <HelpCircle size={18} />
           </button>
           <button
             onClick={() => router.push("/settings")}
-            className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            title="Configurações"
+          >
+            <Settings size={16} /> Config
+          </button>
+          <button
+            onClick={() => router.push("/settings")}
+            className="sm:hidden cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
             title="Configurações"
           >
             <Settings size={18} />
@@ -46,7 +81,14 @@ export function Header() {
           <ThemeToggle />
           <button
             onClick={handleLogout}
-            className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            title="Sair"
+          >
+            <LogOut size={16} /> Sair
+          </button>
+          <button
+            onClick={handleLogout}
+            className="sm:hidden cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
             title="Sair"
           >
             <LogOut size={18} />
