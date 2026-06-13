@@ -1,28 +1,33 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase-client";
-import type { TransacaoFormData } from "@/lib/types";
 import { Input } from "./ui/Input";
 import { Button } from "./ui/Button";
 import { CategorySelect } from "./CategorySelect";
 
 type Props = {
   onDone: () => void;
-  initial?: TransacaoFormData & { id?: string };
-  currentMonth?: string;
+  initial?: {
+    id?: string;
+    tipo: "receita" | "despesa";
+    categoria_id: string;
+    descricao: string;
+    valor: string;
+    dia_vencimento: number;
+  };
 };
 
-export function TransactionForm({ onDone, initial, currentMonth }: Props) {
-  const supabase = useMemo(() => createClient(), []);
+export function RecorrenteForm({ onDone, initial }: Props) {
+  const supabase = createClient();
   const [tipo, setTipo] = useState<"receita" | "despesa">(
     initial?.tipo || "despesa"
   );
   const [categoriaId, setCategoriaId] = useState(initial?.categoria_id || "");
   const [descricao, setDescricao] = useState(initial?.descricao || "");
   const [valor, setValor] = useState(initial?.valor || "");
-  const [data, setData] = useState(
-    initial?.data || new Date().toISOString().slice(0, 10)
+  const [diaVencimento, setDiaVencimento] = useState(
+    String(initial?.dia_vencimento || 5)
   );
   const [loading, setLoading] = useState(false);
 
@@ -30,30 +35,18 @@ export function TransactionForm({ onDone, initial, currentMonth }: Props) {
     e.preventDefault();
     setLoading(true);
 
-    const novaData = data;
-    const mesDaData = novaData.slice(0, 7);
-    const status = currentMonth && mesDaData > currentMonth ? "pendente" : "confirmada";
+    const payload = {
+      tipo,
+      categoria_id: categoriaId,
+      descricao,
+      valor: parseFloat(valor.replace(",", ".")),
+      dia_vencimento: parseInt(diaVencimento, 10),
+    };
 
     if (initial?.id) {
-      await supabase
-        .from("sm_transacoes")
-        .update({
-          tipo,
-          categoria_id: categoriaId,
-          descricao,
-          valor: parseFloat(valor.replace(",", ".")),
-          data: novaData,
-        })
-        .eq("id", initial.id);
+      await supabase.from("sm_recorrentes").update(payload).eq("id", initial.id);
     } else {
-      await supabase.from("sm_transacoes").insert({
-        tipo,
-        categoria_id: categoriaId,
-        descricao,
-        valor: parseFloat(valor.replace(",", ".")),
-        data: novaData,
-        status,
-      });
+      await supabase.from("sm_recorrentes").insert(payload);
     }
 
     setLoading(false);
@@ -65,10 +58,7 @@ export function TransactionForm({ onDone, initial, currentMonth }: Props) {
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => {
-            setTipo("receita");
-            setCategoriaId("");
-          }}
+          onClick={() => { setTipo("receita"); setCategoriaId(""); }}
           className={`flex-1 cursor-pointer rounded-lg py-2 text-sm font-medium transition-colors ${
             tipo === "receita"
               ? "bg-green-500 text-white"
@@ -79,10 +69,7 @@ export function TransactionForm({ onDone, initial, currentMonth }: Props) {
         </button>
         <button
           type="button"
-          onClick={() => {
-            setTipo("despesa");
-            setCategoriaId("");
-          }}
+          onClick={() => { setTipo("despesa"); setCategoriaId(""); }}
           className={`flex-1 cursor-pointer rounded-lg py-2 text-sm font-medium transition-colors ${
             tipo === "despesa"
               ? "bg-red-500 text-white"
@@ -93,15 +80,11 @@ export function TransactionForm({ onDone, initial, currentMonth }: Props) {
         </button>
       </div>
 
-      <CategorySelect
-        tipo={tipo}
-        value={categoriaId}
-        onChange={setCategoriaId}
-      />
+      <CategorySelect tipo={tipo} value={categoriaId} onChange={setCategoriaId} />
 
       <Input
         label="Descrição"
-        placeholder="Ex: Almoço no restaurante"
+        placeholder="Ex: Aluguel"
         value={descricao}
         onChange={(e) => setDescricao(e.target.value)}
         required
@@ -118,10 +101,12 @@ export function TransactionForm({ onDone, initial, currentMonth }: Props) {
       />
 
       <Input
-        label="Data"
-        type="date"
-        value={data}
-        onChange={(e) => setData(e.target.value)}
+        label="Dia de vencimento"
+        type="number"
+        min={1}
+        max={31}
+        value={diaVencimento}
+        onChange={(e) => setDiaVencimento(e.target.value)}
         required
       />
 

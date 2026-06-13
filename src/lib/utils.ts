@@ -37,6 +37,26 @@ export function getLast6Months(month: string): string[] {
   return meses;
 }
 
+export function isFutureMonth(month: string): boolean {
+  return month > getCurrentMonth();
+}
+
+export function isPastMonth(month: string): boolean {
+  return month < getCurrentMonth();
+}
+
+export function getNextNMonths(current: string, n: number): string[] {
+  const [ano, mes] = current.split("-").map(Number);
+  const meses: string[] = [];
+  for (let i = 0; i < n; i++) {
+    let m = mes + i;
+    let a = ano;
+    while (m > 12) { m -= 12; a += 1; }
+    meses.push(`${a}-${String(m).padStart(2, "0")}`);
+  }
+  return meses;
+}
+
 export const MONTH_NAMES: Record<string, string> = {
   "01": "Janeiro", "02": "Fevereiro", "03": "Março", "04": "Abril",
   "05": "Maio", "06": "Junho", "07": "Julho", "08": "Agosto",

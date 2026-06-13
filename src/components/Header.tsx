@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Settings } from "lucide-react";
+import { LogOut, Settings, Repeat } from "lucide-react";
 import { createClient } from "@/lib/supabase-client";
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
@@ -21,6 +21,13 @@ export function Header() {
           ✦ Secretaria Monetária
         </h1>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => router.push("/recorrentes")}
+            className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+            title="Contas Recorrentes"
+          >
+            <Repeat size={18} />
+          </button>
           <button
             onClick={() => router.push("/settings")}
             className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"

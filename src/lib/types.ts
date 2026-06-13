@@ -7,6 +7,8 @@ export interface Categoria {
   created_at: string;
 }
 
+export type StatusTransacao = "confirmada" | "pendente";
+
 export interface Transacao {
   id: string;
   user_id: string;
@@ -15,6 +17,7 @@ export interface Transacao {
   descricao: string;
   valor: number;
   data: string;
+  status: StatusTransacao;
   created_at: string;
   categoria_nome?: string;
   categoria_cor?: string;
@@ -26,6 +29,21 @@ export interface TransacaoFormData {
   descricao: string;
   valor: string;
   data: string;
+  status?: StatusTransacao;
+}
+
+export interface Recorrente {
+  id: string;
+  user_id: string;
+  categoria_id: string;
+  descricao: string;
+  valor: number;
+  tipo: "receita" | "despesa";
+  dia_vencimento: number;
+  ativo: boolean;
+  created_at: string;
+  categoria_nome?: string;
+  categoria_cor?: string;
 }
 
 export interface DashboardData {

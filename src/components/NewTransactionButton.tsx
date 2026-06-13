@@ -8,9 +8,10 @@ import { TransactionForm } from "./TransactionForm";
 
 type Props = {
   onDone?: () => void;
+  currentMonth?: string;
 };
 
-export function NewTransactionButton({ onDone }: Props) {
+export function NewTransactionButton({ onDone, currentMonth }: Props) {
   const [open, setOpen] = useState(false);
 
   function handleDone() {
@@ -25,7 +26,7 @@ export function NewTransactionButton({ onDone }: Props) {
         Nova Transação
       </Button>
       <Modal open={open} onClose={() => setOpen(false)} title="Nova Transação">
-        <TransactionForm onDone={handleDone} />
+        <TransactionForm onDone={handleDone} currentMonth={currentMonth} />
       </Modal>
     </>
   );

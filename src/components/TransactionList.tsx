@@ -8,14 +8,15 @@ import { Card } from "./ui/Card";
 import { Button } from "./ui/Button";
 import { Modal } from "./ui/Modal";
 import { TransactionForm } from "./TransactionForm";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Check } from "lucide-react";
 
 type Props = {
   month: string;
   refreshKey: number;
+  currentMonth?: string;
 };
 
-export function TransactionList({ month, refreshKey }: Props) {
+export function TransactionList({ month, refreshKey, currentMonth }: Props) {
   const supabase = createClient();
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [editItem, setEditItem] = useState<Transacao | null>(null);
@@ -49,6 +50,11 @@ export function TransactionList({ month, refreshKey }: Props) {
     load();
   }, [load, refreshKey]);
 
+  async function confirmar(id: string) {
+    await supabase.from("sm_transacoes").update({ status: "confirmada" }).eq("id", id);
+    load();
+  }
+
   async function excluir(id: string) {
     if (!confirm("Excluir esta transação?")) return;
     await supabase.from("sm_transacoes").delete().eq("id", id);
@@ -65,53 +71,74 @@ export function TransactionList({ month, refreshKey }: Props) {
           {transacoes.map((t) => (
             <div
               key={t.id}
-              className="flex items-center justify-between rounded-lg border border-[var(--border)] px-3 py-2.5 text-sm"
+              className={`flex items-center justify-between rounded-lg border px-3 py-2.5 text-sm ${
+                t.status === "pendente"
+                  ? "border-dashed border-[var(--border)] opacity-70"
+                  : "border-[var(--border)]"
+              }`}
             >
-                <div className="flex min-w-0 flex-1 items-center gap-3">
-                  <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: t.categoria_cor || "#6366f1" }}
-                  />
-                  <div className="min-w-0">
-                    <p className="truncate font-medium text-[var(--foreground)]">
-                      {t.descricao}
-                    </p>
-                    <p className="text-xs text-[var(--muted-foreground)]">
-                      {t.categoria_nome} <span className="hidden sm:inline">· {formatDate(t.data)}</span>
-                    </p>
-                  </div>
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <span
+                  className={`h-2.5 w-2.5 shrink-0 rounded-full ${
+                    t.status === "pendente" ? "animate-pulse" : ""
+                  }`}
+                  style={{ backgroundColor: t.categoria_cor || "#6366f1" }}
+                />
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-[var(--foreground)]">
+                    {t.descricao}
+                  </p>
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    {t.categoria_nome}
+                    {t.status === "pendente" && (
+                      <span className="ml-1.5 rounded bg-yellow-500/10 px-1.5 py-0.5 text-[10px] text-yellow-500 font-medium">
+                        Previsto
+                      </span>
+                    )}
+                    <span className="hidden sm:inline"> · {formatDate(t.data)}</span>
+                  </p>
                 </div>
-                <div className="flex items-center gap-1 pl-2 sm:gap-2 sm:pl-3">
-                  <span
-                    className={`shrink-0 font-semibold ${
-                      t.tipo === "receita" ? "text-green-500" : "text-red-500"
-                    }`}
-                  >
-                    {t.tipo === "receita" ? "+" : "-"}
-                    {formatCurrency(t.valor)}
-                  </span>
+              </div>
+              <div className="flex items-center gap-1 pl-2 sm:gap-2 sm:pl-3">
+                <span
+                  className={`shrink-0 font-semibold ${
+                    t.tipo === "receita" ? "text-green-500" : "text-red-500"
+                  }`}
+                >
+                  {t.tipo === "receita" ? "+" : "-"}
+                  {formatCurrency(t.valor)}
+                </span>
+                {t.status === "pendente" && (
                   <button
-                    onClick={() =>
-                      setEditItem({
-                        ...t,
-                        categoria_id: t.categoria_id,
-                        descricao: t.descricao,
-                        valor: t.valor,
-                        data: t.data,
-                        tipo: t.tipo,
-                      } as Transacao)
-                    }
-                    className="cursor-pointer rounded p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+                    onClick={() => confirmar(t.id)}
+                    className="cursor-pointer rounded p-2 text-green-500 hover:bg-green-500/10 transition-colors"
+                    title="Confirmar"
                   >
-                    <Pencil size={16} />
+                    <Check size={16} />
                   </button>
-                  <button
-                    onClick={() => excluir(t.id)}
-                    className="cursor-pointer rounded p-2 text-[var(--muted-foreground)] hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
+                )}
+                <button
+                  onClick={() =>
+                    setEditItem({
+                      ...t,
+                      categoria_id: t.categoria_id,
+                      descricao: t.descricao,
+                      valor: t.valor,
+                      data: t.data,
+                      tipo: t.tipo,
+                    } as Transacao)
+                  }
+                  className="cursor-pointer rounded p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
+                  onClick={() => excluir(t.id)}
+                  className="cursor-pointer rounded p-2 text-[var(--muted-foreground)] hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
           ))}
           {transacoes.length === 0 && (
@@ -141,6 +168,7 @@ export function TransactionList({ month, refreshKey }: Props) {
               valor: String(editItem.valor),
               data: editItem.data,
             }}
+            currentMonth={currentMonth}
           />
         )}
       </Modal>

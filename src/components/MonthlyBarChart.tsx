@@ -13,10 +13,20 @@ import { Card } from "./ui/Card";
 
 type Props = {
   data: { mes: string; receitas: number; despesas: number }[];
+  previstoData?: { mes: string; receitas: number; despesas: number }[];
 };
 
-export function MonthlyBarChart({ data }: Props) {
+export function MonthlyBarChart({ data, previstoData }: Props) {
   if (data.length === 0) return null;
+
+  const merged = data.map((item) => {
+    const prev = previstoData?.find((p) => p.mes === item.mes);
+    return {
+      ...item,
+      receitasPrevistas: prev ? Math.max(0, prev.receitas - item.receitas) : 0,
+      despesasPrevistas: prev ? Math.max(0, prev.despesas - item.despesas) : 0,
+    };
+  });
 
   return (
     <Card>
@@ -24,7 +34,7 @@ export function MonthlyBarChart({ data }: Props) {
         Comparativo Mensal
       </h3>
       <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={data}>
+        <BarChart data={merged}>
           <XAxis
             dataKey="mes"
             tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
@@ -50,30 +60,55 @@ export function MonthlyBarChart({ data }: Props) {
               fontSize: "13px",
               pointerEvents: "none",
             }}
-            formatter={(value) =>
-              typeof value === "number"
-                ? value.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })
-                : value
-            }
+            formatter={(value: any, name: any) => {
+              const labels: Record<string, string> = {
+                receitas: "Receita Realizada",
+                receitasPrevistas: "Receita Prevista",
+                despesas: "Despesa Realizada",
+                despesasPrevistas: "Despesa Prevista",
+              };
+              const v = typeof value === "number" ? value : 0;
+              return [
+                v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+                labels[name as string] || String(name),
+              ];
+            }}
           />
           <Legend
             wrapperStyle={{ fontSize: 12, color: "var(--foreground)" }}
           />
           <Bar
             dataKey="receitas"
-            name="Receitas"
+            name="Receita"
             fill="#22c55e"
             radius={[4, 4, 0, 0]}
+            stackId="receitas"
+            isAnimationActive={true}
+          />
+          <Bar
+            dataKey="receitasPrevistas"
+            name="Receita (Prevista)"
+            fill="#22c55e"
+            fillOpacity={0.3}
+            radius={[4, 4, 0, 0]}
+            stackId="receitas"
             isAnimationActive={true}
           />
           <Bar
             dataKey="despesas"
-            name="Despesas"
+            name="Despesa"
             fill="#ef4444"
             radius={[4, 4, 0, 0]}
+            stackId="despesas"
+            isAnimationActive={true}
+          />
+          <Bar
+            dataKey="despesasPrevistas"
+            name="Despesa (Prevista)"
+            fill="#ef4444"
+            fillOpacity={0.3}
+            radius={[4, 4, 0, 0]}
+            stackId="despesas"
             isAnimationActive={true}
           />
         </BarChart>

@@ -1,33 +1,35 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { monthLabel, getLast6Months } from "@/lib/utils";
+import { monthLabel } from "@/lib/utils";
 
 type Props = {
+  months: string[];
   value: string;
   onChange: (month: string) => void;
 };
 
-export function MonthSelector({ value, onChange }: Props) {
-  const meses = getLast6Months(value);
+export function MonthSelector({ months, value, onChange }: Props) {
+  const idx = months.indexOf(value);
+  const temAnterior = idx > 0;
+  const temProximo = idx < months.length - 1;
 
   function prev() {
-    const [ano, mes] = value.split("-").map(Number);
-    const d = new Date(ano, mes - 2, 1);
-    onChange(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    if (temAnterior) onChange(months[idx - 1]);
   }
 
   function next() {
-    const [ano, mes] = value.split("-").map(Number);
-    const d = new Date(ano, mes, 1);
-    onChange(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
+    if (temProximo) onChange(months[idx + 1]);
   }
+
+  if (months.length === 0) return null;
 
   return (
     <div className="flex items-center gap-2">
       <button
         onClick={prev}
-        className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+        disabled={!temAnterior}
+        className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <ChevronLeft size={18} />
       </button>
@@ -37,7 +39,7 @@ export function MonthSelector({ value, onChange }: Props) {
         onChange={(e) => onChange(e.target.value)}
         className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm font-medium text-[var(--foreground)] outline-none max-w-[170px] sm:max-w-none truncate"
       >
-        {meses.map((m) => (
+        {months.map((m) => (
           <option key={m} value={m}>
             {monthLabel(m)}
           </option>
@@ -46,7 +48,8 @@ export function MonthSelector({ value, onChange }: Props) {
 
       <button
         onClick={next}
-        className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+        disabled={!temProximo}
+        className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <ChevronRight size={18} />
       </button>

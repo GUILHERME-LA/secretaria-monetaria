@@ -7,9 +7,11 @@ import { formatCurrency } from "@/lib/utils";
 type Props = {
   receitas: number;
   despesas: number;
+  previstoReceitas?: number;
+  previstoDespesas?: number;
 };
 
-export function DashboardCards({ receitas, despesas }: Props) {
+export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previstoDespesas = 0 }: Props) {
   const saldo = receitas - despesas;
 
   return (
@@ -24,6 +26,11 @@ export function DashboardCards({ receitas, despesas }: Props) {
             <p className="text-lg font-bold text-green-500">
               {formatCurrency(receitas)}
             </p>
+            {previstoReceitas > 0 && (
+              <p className="text-xs text-[var(--muted-foreground)]">
+                +{formatCurrency(previstoReceitas)} previsto
+              </p>
+            )}
           </div>
         </div>
       </Card>
@@ -38,6 +45,11 @@ export function DashboardCards({ receitas, despesas }: Props) {
             <p className="text-lg font-bold text-red-500">
               {formatCurrency(despesas)}
             </p>
+            {previstoDespesas > 0 && (
+              <p className="text-xs text-[var(--muted-foreground)]">
+                +{formatCurrency(previstoDespesas)} previsto
+              </p>
+            )}
           </div>
         </div>
       </Card>

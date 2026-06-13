@@ -48,3 +48,29 @@ CREATE POLICY select_own_trans ON sm.sm_transacoes FOR SELECT USING (user_id = a
 CREATE POLICY insert_own_trans ON sm.sm_transacoes FOR INSERT WITH CHECK (user_id = auth.uid());
 CREATE POLICY update_own_trans ON sm.sm_transacoes FOR UPDATE USING (user_id = auth.uid());
 CREATE POLICY delete_own_trans ON sm.sm_transacoes FOR DELETE USING (user_id = auth.uid());
+
+-- 6. Status column para transações (confirmada = realizada, pendente = prevista)
+ALTER TABLE sm.sm_transacoes ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'confirmada' CHECK (status IN ('confirmada', 'pendente'));
+CREATE INDEX IF NOT EXISTS idx_sm_transacoes_status ON sm.sm_transacoes(user_id, status);
+
+-- 7. Tabela de contas recorrentes
+CREATE TABLE IF NOT EXISTS sm.sm_recorrentes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  categoria_id UUID NOT NULL REFERENCES sm.sm_categorias(id) ON DELETE RESTRICT,
+  descricao TEXT NOT NULL,
+  valor NUMERIC(12,2) NOT NULL CHECK (valor > 0),
+  tipo TEXT NOT NULL CHECK (tipo IN ('receita', 'despesa')),
+  dia_vencimento INTEGER NOT NULL CHECK (dia_vencimento BETWEEN 1 AND 31),
+  ativo BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_sm_recorrentes_user ON sm.sm_recorrentes(user_id);
+
+ALTER TABLE sm.sm_recorrentes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY select_own_rec ON sm.sm_recorrentes FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY insert_own_rec ON sm.sm_recorrentes FOR INSERT WITH CHECK (user_id = auth.uid());
+CREATE POLICY update_own_rec ON sm.sm_recorrentes FOR UPDATE USING (user_id = auth.uid());
+CREATE POLICY delete_own_rec ON sm.sm_recorrentes FOR DELETE USING (user_id = auth.uid());
