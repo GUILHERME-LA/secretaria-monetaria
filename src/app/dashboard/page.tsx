@@ -402,7 +402,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <TransactionList month={month} refreshKey={refreshKey} currentMonth={hoje} />
+        <TransactionList month={month} refreshKey={refreshKey} currentMonth={hoje} onRefresh={handleRefresh} />
       </main>
 
       <ChatFab onDone={handleRefresh} />

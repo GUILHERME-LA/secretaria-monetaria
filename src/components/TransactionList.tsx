@@ -15,9 +15,10 @@ type Props = {
   month: string;
   refreshKey: number;
   currentMonth?: string;
+  onRefresh?: () => void;
 };
 
-export function TransactionList({ month, refreshKey, currentMonth }: Props) {
+export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: Props) {
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [editItem, setEditItem] = useState<Transacao | null>(null);
   const [deleteItem, setDeleteItem] = useState<Transacao | null>(null);
@@ -57,6 +58,7 @@ export function TransactionList({ month, refreshKey, currentMonth }: Props) {
       body: JSON.stringify({ action: "confirmar_transacao", payload: { id } }),
     });
     load();
+    onRefresh?.();
   }
 
   async function confirmarExclusao() {
@@ -99,6 +101,7 @@ export function TransactionList({ month, refreshKey, currentMonth }: Props) {
     setDeleteItem(null);
     setDeleteJustificativa("");
     load();
+    onRefresh?.();
   }
 
   const receitas = transacoes.filter((t) => t.tipo === "receita");
@@ -243,6 +246,7 @@ export function TransactionList({ month, refreshKey, currentMonth }: Props) {
             onDone={() => {
               setEditItem(null);
               load();
+              onRefresh?.();
             }}
             initial={{
               id: editItem.id,
