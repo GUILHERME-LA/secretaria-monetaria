@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, LayoutDashboard, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/Card";
 
@@ -102,21 +102,6 @@ export default function AjudaPage() {
     <>
       <Header />
       <main className="mx-auto max-w-3xl px-4 py-8">
-        <div className="mb-4 flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
-          >
-            <ArrowLeft size={16} /> Voltar
-          </button>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
-          >
-            <LayoutDashboard size={16} /> Início
-          </button>
-        </div>
-
         <h1 className="mb-2 text-2xl font-bold text-[var(--foreground)]">Ajuda</h1>
         <p className="mb-8 text-sm text-[var(--muted-foreground)]">
           Tire suas dúvidas sobre como usar a Secretaria Monetária.

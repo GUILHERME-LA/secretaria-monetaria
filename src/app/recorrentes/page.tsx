@@ -8,11 +8,9 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { RecorrenteForm } from "@/components/RecorrenteForm";
-import { ArrowLeft, LayoutDashboard, Plus, Pencil, ToggleLeft, ToggleRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Plus, Pencil, ToggleLeft, ToggleRight } from "lucide-react";
 
 export default function RecorrentesPage() {
-  const router = useRouter();
   const [recorrentes, setRecorrentes] = useState<(Recorrente & { categoria_nome?: string })[]>([]);
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
@@ -50,15 +48,6 @@ export default function RecorrentesPage() {
     <>
       <Header />
       <main className="mx-auto max-w-3xl px-4 py-8">
-        <div className="mb-4 flex items-center gap-3">
-          <button onClick={() => router.back()} className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-            <ArrowLeft size={16} /> Voltar
-          </button>
-          <button onClick={() => router.push("/dashboard")} className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-            <LayoutDashboard size={16} /> Início
-          </button>
-        </div>
-
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-[var(--foreground)]">Contas Recorrentes</h1>
           <Button

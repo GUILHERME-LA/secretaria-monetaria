@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, LayoutDashboard, Mail, Lock, Save, Loader2 } from "lucide-react";
+import { Mail, Lock, Save, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase-client";
 import type { User } from "@supabase/supabase-js";
 import { Header } from "@/components/Header";
@@ -124,23 +124,6 @@ export default function SettingsPage() {
     <>
       <Header />
       <main className="mx-auto max-w-2xl px-4 py-8">
-        <div className="mb-4 flex items-center gap-3">
-          <button
-            onClick={() => router.back()}
-            className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Voltar
-          </button>
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors"
-          >
-            <LayoutDashboard size={16} />
-            Início
-          </button>
-        </div>
-
         <h1 className="mb-8 text-2xl font-bold text-[var(--foreground)]">
           Configurações da conta
         </h1>

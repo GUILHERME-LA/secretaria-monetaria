@@ -1,15 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import type { Auditoria } from "@/lib/types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Header } from "@/components/Header";
 import { Card } from "@/components/ui/Card";
-import { ArrowLeft, LayoutDashboard, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 
 export default function AuditoriaPage() {
-  const router = useRouter();
   const [registros, setRegistros] = useState<(Auditoria & { transacao_descricao?: string })[]>([]);
   const [expandido, setExpandido] = useState<string | null>(null);
 
@@ -36,15 +34,6 @@ export default function AuditoriaPage() {
     <>
       <Header />
       <main className="mx-auto max-w-3xl px-4 py-8">
-        <div className="mb-4 flex items-center gap-3">
-          <button onClick={() => router.back()} className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-            <ArrowLeft size={16} /> Voltar
-          </button>
-          <button onClick={() => router.push("/dashboard")} className="inline-flex cursor-pointer items-center gap-1.5 text-sm text-[var(--muted-foreground)] hover:text-[var(--foreground)] transition-colors">
-            <LayoutDashboard size={16} /> Início
-          </button>
-        </div>
-
         <h1 className="mb-2 text-2xl font-bold text-[var(--foreground)]">Histórico de Alterações</h1>
         <p className="mb-8 text-sm text-[var(--muted-foreground)]">
           Todas as alterações e exclusões feitas nas transações.

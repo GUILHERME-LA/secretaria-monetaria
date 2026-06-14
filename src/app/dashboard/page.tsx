@@ -186,23 +186,13 @@ export default function DashboardPage() {
   return (
     <>
       <Header />
-      <main className="mx-auto max-w-6xl px-4 py-6">
-        <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
           <MonthSelector months={availableMonths} value={month} onChange={setMonth} />
           <NewTransactionButton onDone={handleRefresh} currentMonth={hoje} />
         </div>
 
-        <label className="mb-6 flex w-fit cursor-pointer items-center gap-2 text-sm text-[var(--foreground)]">
-          <input
-            type="checkbox"
-            checked={mostrarPrevistas}
-            onChange={() => setMostrarPrevistas((v) => !v)}
-            className="h-4 w-4 accent-[var(--accent)]"
-          />
-          Mostrar valores previstos
-        </label>
-
-        <div className="mb-6">
+        <div className="mb-8">
           <DashboardCards
             receitas={receitas}
             despesas={despesas}
@@ -211,12 +201,35 @@ export default function DashboardPage() {
           />
         </div>
 
-        <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">
+            Visão Geral
+          </h2>
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-[var(--foreground)]">
+            <span className="text-xs text-[var(--muted-foreground)]">Mostrar previstos</span>
+            <button
+              role="switch"
+              aria-checked={mostrarPrevistas}
+              onClick={() => setMostrarPrevistas((v) => !v)}
+              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
+                mostrarPrevistas ? "bg-[var(--accent)]" : "bg-[var(--muted)]"
+              }`}
+            >
+              <span
+                className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow ring-0 transition-transform ${
+                  mostrarPrevistas ? "translate-x-4" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </label>
+        </div>
+
+        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <ExpensePieChart data={pieData} />
           <ExpenseRanking data={rankingData} />
         </div>
 
-        <div className="mb-6">
+        <div className="mb-8">
           <MonthlyBarChart
             data={comparativo}
             previstoData={mostrarPrevistas ? comparativoTotal : undefined}

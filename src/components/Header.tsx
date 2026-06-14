@@ -1,100 +1,76 @@
 "use client";
 
-import { LogOut, Settings, Repeat, HelpCircle, History } from "lucide-react";
-import { createClient } from "@/lib/supabase-client";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Repeat, History, HelpCircle, Menu } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { UserMenu } from "./UserMenu";
+import { SideDrawer } from "./SideDrawer";
+
+const navLinks = [
+  { href: "/recorrentes", label: "Recorrentes", icon: Repeat },
+  { href: "/auditoria", label: "Histórico", icon: History },
+  { href: "/ajuda", label: "Ajuda", icon: HelpCircle },
+];
 
 export function Header() {
   const router = useRouter();
-  const supabase = createClient();
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/login");
-  }
+  const pathname = usePathname();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-lg">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <h1 id="tour-header" className="text-lg font-bold tracking-tight text-[var(--foreground)]">
-          ✦ Secretaria Monetária
-        </h1>
-        <div className="flex items-center gap-2">
-          <button
-            id="tour-recorrentes"
-            onClick={() => router.push("/recorrentes")}
-            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-            title="Contas Recorrentes"
-          >
-            <Repeat size={16} /> Recorrentes
-          </button>
-          <button
-            onClick={() => router.push("/recorrentes")}
-            className="sm:hidden cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-            title="Contas Recorrentes"
-          >
-            <Repeat size={18} />
-          </button>
-          <button
-            onClick={() => router.push("/auditoria")}
-            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-            title="Histórico de Alterações"
-          >
-            <History size={16} /> Histórico
-          </button>
-          <button
-            onClick={() => router.push("/auditoria")}
-            className="sm:hidden cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-            title="Histórico de Alterações"
-          >
-            <History size={18} />
-          </button>
-          <button
-            onClick={() => router.push("/ajuda")}
-            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-            title="Ajuda"
-          >
-            <HelpCircle size={16} /> Ajuda
-          </button>
-          <button
-            onClick={() => router.push("/ajuda")}
-            className="sm:hidden cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-            title="Ajuda"
-          >
-            <HelpCircle size={18} />
-          </button>
-          <button
-            onClick={() => router.push("/settings")}
-            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-            title="Configurações"
-          >
-            <Settings size={16} /> Config
-          </button>
-          <button
-            onClick={() => router.push("/settings")}
-            className="sm:hidden cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-            title="Configurações"
-          >
-            <Settings size={18} />
-          </button>
-          <ThemeToggle />
-          <button
-            onClick={handleLogout}
-            className="hidden sm:inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-2 text-sm text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-            title="Sair"
-          >
-            <LogOut size={16} /> Sair
-          </button>
-          <button
-            onClick={handleLogout}
-            className="sm:hidden cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-            title="Sair"
-          >
-            <LogOut size={18} />
-          </button>
+    <>
+      <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-lg">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 sm:gap-6">
+            <button
+              onClick={() => setDrawerOpen(true)}
+              className="flex cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors lg:hidden"
+              aria-label="Abrir menu"
+            >
+              <Menu size={20} />
+            </button>
+
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="flex cursor-pointer items-center gap-2"
+              id="tour-header"
+            >
+              <span className="text-lg font-bold tracking-tight text-[var(--foreground)]">
+                ✦ Secretaria Monetária
+              </span>
+            </button>
+
+            <nav className="hidden lg:flex items-center gap-1">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const active = pathname === link.href;
+                return (
+                  <button
+                    key={link.href}
+                    onClick={() => router.push(link.href)}
+                    className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                      active
+                        ? "text-[var(--accent)] bg-[var(--accent)]/10"
+                        : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+                    }`}
+                  >
+                    <Icon size={16} />
+                    <span>{link.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          <div className="flex items-center gap-1 sm:gap-2">
+            <ThemeToggle />
+            <UserMenu />
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      <SideDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+    </>
   );
 }
