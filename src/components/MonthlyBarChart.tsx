@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -17,9 +18,13 @@ type Props = {
 };
 
 export function MonthlyBarChart({ data, previstoData }: Props) {
+  const [periodo, setPeriodo] = useState<6 | 12>(6);
+
   if (data.length === 0) return null;
 
-  const merged = data.map((item) => {
+  const exibir = periodo === 12 ? data : data.slice(-6);
+
+  const merged = exibir.map((item) => {
     const prev = previstoData?.find((p) => p.mes === item.mes);
     return {
       ...item,
@@ -30,9 +35,26 @@ export function MonthlyBarChart({ data, previstoData }: Props) {
 
   return (
     <Card>
-      <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
-        Evolução Mensal
-      </h3>
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-[var(--foreground)]">
+          Evolução Mensal
+        </h3>
+        <div className="flex gap-1 rounded-lg bg-[var(--muted)] p-0.5">
+          {([6, 12] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriodo(p)}
+              className={`cursor-pointer rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+                periodo === p
+                  ? "bg-[var(--background)] text-[var(--foreground)] shadow-sm"
+                  : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+              }`}
+            >
+              {p} meses
+            </button>
+          ))}
+        </div>
+      </div>
       <ResponsiveContainer width="100%" height={280}>
         <BarChart data={merged} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
           <XAxis

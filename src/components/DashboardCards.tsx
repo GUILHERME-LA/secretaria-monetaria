@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { ArrowDown, ArrowUp, Wallet, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Card } from "./ui/Card";
+import { SparklineChart } from "./SparklineChart";
 import { formatCurrency } from "@/lib/utils";
 
 type Props = {
@@ -12,9 +13,11 @@ type Props = {
   previstoDespesas?: number;
   variacaoReceitas?: number | null;
   variacaoDespesas?: number | null;
+  sparklineReceitas?: number[];
+  sparklineDespesas?: number[];
 };
 
-export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previstoDespesas = 0, variacaoReceitas, variacaoDespesas }: Props) {
+export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previstoDespesas = 0, variacaoReceitas, variacaoDespesas, sparklineReceitas, sparklineDespesas }: Props) {
   const saldo = receitas - despesas;
 
   function TrendBadge({ value, good }: { value: number; good: "up" | "down" }) {
@@ -90,6 +93,11 @@ export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previ
                     </span>
                   )}
                 </div>
+                {sparklineReceitas && sparklineReceitas.length >= 2 && (
+                  <div className="mt-2">
+                    <SparklineChart data={sparklineReceitas} color="#22c55e" />
+                  </div>
+                )}
               </div>
             </div>
           </Card>
@@ -124,6 +132,11 @@ export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previ
                     </span>
                   )}
                 </div>
+                {sparklineDespesas && sparklineDespesas.length >= 2 && (
+                  <div className="mt-2">
+                    <SparklineChart data={sparklineDespesas} color="#ef4444" />
+                  </div>
+                )}
               </div>
             </div>
           </Card>

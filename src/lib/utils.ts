@@ -22,19 +22,24 @@ export function getMonthBounds(month: string) {
   return { inicio, fim, ano, mes };
 }
 
-export function getLast6Months(month: string): string[] {
+export function getLastNMonths(month: string, n: number): string[] {
   const [ano, mes] = month.split("-").map(Number);
   const meses: string[] = [];
-  for (let i = 5; i >= 0; i--) {
+  for (let i = n - 1; i >= 0; i--) {
     let m = mes - i;
     let a = ano;
-    if (m <= 0) {
-      m += 12;
-      a -= 1;
-    }
+    while (m <= 0) { m += 12; a -= 1; }
     meses.push(`${a}-${String(m).padStart(2, "0")}`);
   }
   return meses;
+}
+
+export function getLast6Months(month: string): string[] {
+  return getLastNMonths(month, 6);
+}
+
+export function getLast12Months(month: string): string[] {
+  return getLastNMonths(month, 12);
 }
 
 export function isFutureMonth(month: string): boolean {

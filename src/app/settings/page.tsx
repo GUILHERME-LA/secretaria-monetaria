@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Save, Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
+import { Mail, Lock, Save, Loader2, User as UserIcon, Shield, Info } from "lucide-react";
 import { createClient } from "@/lib/supabase-client";
 import type { User } from "@supabase/supabase-js";
 import { Header } from "@/components/Header";
@@ -15,6 +16,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loadingUser, setLoadingUser] = useState(true);
+  const [userMeta, setUserMeta] = useState<{ created_at?: string; last_sign_in_at?: string }>({});
 
   const [newEmail, setNewEmail] = useState("");
   const [emailLoading, setEmailLoading] = useState(false);
@@ -36,6 +38,10 @@ export default function SettingsPage() {
         } else {
           setUser(user);
           setNewEmail(user.email || "");
+          setUserMeta({
+            created_at: user.created_at,
+            last_sign_in_at: user.last_sign_in_at || undefined,
+          });
         }
         setLoadingUser(false);
       }
@@ -123,86 +129,165 @@ export default function SettingsPage() {
   return (
     <>
       <Header />
-      <main className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="mb-8 text-2xl font-bold text-[var(--foreground)]">
-          Configurações da conta
-        </h1>
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-[var(--foreground)]">
+            Configurações da conta
+          </h1>
+          <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+            Gerencie seu email, senha e informações da conta.
+          </p>
+        </div>
 
-        <Card className="mb-6">
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-            <Mail className="h-5 w-5" />
-            Alterar email
-          </h2>
-          <form onSubmit={handleChangeEmail} className="flex flex-col gap-4">
-            <Input label="Email atual" value={user?.email || ""} disabled />
-            <Input
-              label="Novo email"
-              type="email"
-              placeholder="novo@email.com"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-              required
-            />
-            {emailError && (
-              <p className="text-sm text-[var(--destructive)]">{emailError}</p>
-            )}
-            {emailSuccess && (
-              <p className="text-sm text-green-500">{emailSuccess}</p>
-            )}
-            <Button type="submit" disabled={emailLoading}>
-              <Save className="h-4 w-4" />
-              {emailLoading ? "Salvando..." : "Alterar email"}
-            </Button>
-          </form>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.2 }}
+          className="mb-6"
+        >
+          <Card>
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+              <UserIcon className="h-5 w-5" />
+              Resumo da conta
+            </h2>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between rounded-lg bg-[var(--muted)]/30 px-4 py-3">
+                <span className="text-sm text-[var(--muted-foreground)]">Email</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">
+                  {user?.email || "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg bg-[var(--muted)]/30 px-4 py-3">
+                <span className="text-sm text-[var(--muted-foreground)]">Conta criada em</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">
+                  {userMeta.created_at
+                    ? new Date(userMeta.created_at).toLocaleDateString("pt-BR")
+                    : "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg bg-[var(--muted)]/30 px-4 py-3">
+                <span className="text-sm text-[var(--muted-foreground)]">Último login</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">
+                  {userMeta.last_sign_in_at
+                    ? new Date(userMeta.last_sign_in_at).toLocaleString("pt-BR")
+                    : "—"}
+                </span>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-            <Lock className="h-5 w-5" />
-            Alterar senha
-          </h2>
-          <form
-            onSubmit={handleChangePassword}
-            className="flex flex-col gap-4"
-          >
-            <Input
-              label="Senha atual"
-              type="password"
-              placeholder="••••••••"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              required
-            />
-            <Input
-              label="Nova senha"
-              type="password"
-              placeholder="Mínimo 6 caracteres"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
-            <Input
-              label="Confirmar nova senha"
-              type="password"
-              placeholder="Repita a nova senha"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-            {passwordError && (
-              <p className="text-sm text-[var(--destructive)]">
-                {passwordError}
-              </p>
-            )}
-            {passwordSuccess && (
-              <p className="text-sm text-green-500">{passwordSuccess}</p>
-            )}
-            <Button type="submit" disabled={passwordLoading}>
-              <Save className="h-4 w-4" />
-              {passwordLoading ? "Salvando..." : "Alterar senha"}
-            </Button>
-          </form>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05, duration: 0.2 }}
+          className="mb-6"
+        >
+          <Card>
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+              <Mail className="h-5 w-5" />
+              Alterar email
+            </h2>
+            <form onSubmit={handleChangeEmail} className="flex flex-col gap-4">
+              <Input label="Email atual" value={user?.email || ""} disabled />
+              <Input
+                label="Novo email"
+                type="email"
+                placeholder="novo@email.com"
+                value={newEmail}
+                onChange={(e) => setNewEmail(e.target.value)}
+                required
+              />
+              {emailError && (
+                <p className="text-sm text-[var(--destructive)]">{emailError}</p>
+              )}
+              {emailSuccess && (
+                <p className="text-sm text-green-500">{emailSuccess}</p>
+              )}
+              <Button type="submit" disabled={emailLoading}>
+                <Save className="h-4 w-4" />
+                {emailLoading ? "Salvando..." : "Alterar email"}
+              </Button>
+            </form>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.2 }}
+          className="mb-6"
+        >
+          <Card>
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+              <Lock className="h-5 w-5" />
+              Alterar senha
+            </h2>
+            <form onSubmit={handleChangePassword} className="flex flex-col gap-4">
+              <Input
+                label="Senha atual"
+                type="password"
+                placeholder="••••••••"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+              <Input
+                label="Nova senha"
+                type="password"
+                placeholder="Mínimo 6 caracteres"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+              />
+              <Input
+                label="Confirmar nova senha"
+                type="password"
+                placeholder="Repita a nova senha"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              {passwordError && (
+                <p className="text-sm text-[var(--destructive)]">{passwordError}</p>
+              )}
+              {passwordSuccess && (
+                <p className="text-sm text-green-500">{passwordSuccess}</p>
+              )}
+              <Button type="submit" disabled={passwordLoading}>
+                <Save className="h-4 w-4" />
+                {passwordLoading ? "Salvando..." : "Alterar senha"}
+              </Button>
+            </form>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.2 }}
+        >
+          <Card>
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+              <Info className="h-5 w-5" />
+              Sobre o aplicativo
+            </h2>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between rounded-lg bg-[var(--muted)]/30 px-4 py-3">
+                <span className="text-sm text-[var(--muted-foreground)]">Versão</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">1.0.0</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg bg-[var(--muted)]/30 px-4 py-3">
+                <span className="text-sm text-[var(--muted-foreground)]">Armazenamento</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">Local (navegador)</span>
+              </div>
+              <div className="flex items-center justify-between rounded-lg bg-[var(--muted)]/30 px-4 py-3">
+                <span className="text-sm text-[var(--muted-foreground)]">Autenticação</span>
+                <span className="text-sm font-medium text-[var(--foreground)]">Supabase</span>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
       </main>
     </>
   );

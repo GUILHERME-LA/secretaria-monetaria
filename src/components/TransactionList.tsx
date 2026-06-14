@@ -4,11 +4,12 @@ import { useEffect, useState, useCallback } from "react";
 import type { Transacao } from "@/lib/types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Card } from "./ui/Card";
+import { EmptyState } from "./ui/EmptyState";
 import { Button } from "./ui/Button";
 import { Modal } from "./ui/Modal";
 import { TransactionForm } from "./TransactionForm";
 import { Textarea } from "./ui/Textarea";
-import { Pencil, Trash2, Check, ArrowUp, ArrowDown } from "lucide-react";
+import { Pencil, Trash2, Check, ArrowUp, ArrowDown, List } from "lucide-react";
 
 type Props = {
   month: string;
@@ -223,9 +224,11 @@ export function TransactionList({ month, refreshKey, currentMonth }: Props) {
           )}
 
           {transacoes.length === 0 && (
-            <p className="py-6 text-center text-sm text-[var(--muted-foreground)]">
-              Nenhuma transação neste mês.
-            </p>
+            <EmptyState
+              icon={List}
+              title="Nenhuma transação"
+              description="Nenhuma transação registrada neste mês."
+            />
           )}
         </div>
       </Card>

@@ -1,6 +1,8 @@
 "use client";
 
+import { Trophy } from "lucide-react";
 import { Card } from "./ui/Card";
+import { EmptyState } from "./ui/EmptyState";
 import { formatCurrency } from "@/lib/utils";
 
 type Props = {
@@ -10,14 +12,11 @@ type Props = {
 export function ExpenseRanking({ data }: Props) {
   if (data.length === 0) {
     return (
-      <Card>
-        <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
-          Onde mais gastei
-        </h3>
-        <p className="py-6 text-center text-sm text-[var(--muted-foreground)]">
-          Nenhuma despesa registrada.
-        </p>
-      </Card>
+      <EmptyState
+        icon={Trophy}
+        title="Onde mais gastei"
+        description="Nenhuma despesa registrada neste mês."
+      />
     );
   }
 

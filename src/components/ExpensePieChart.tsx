@@ -1,7 +1,9 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { PieChart as PieChartIcon } from "lucide-react";
 import { Card } from "./ui/Card";
+import { EmptyState } from "./ui/EmptyState";
 import { formatCurrency } from "@/lib/utils";
 
 type Props = {
@@ -13,14 +15,11 @@ export function ExpensePieChart({ data }: Props) {
 
   if (data.length === 0) {
     return (
-      <Card>
-        <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
-          Gastos por Categoria
-        </h3>
-        <p className="py-6 text-center text-sm text-[var(--muted-foreground)]">
-          Nenhuma despesa registrada.
-        </p>
-      </Card>
+      <EmptyState
+        icon={PieChartIcon}
+        title="Gastos por Categoria"
+        description="Nenhuma despesa registrada neste mês."
+      />
     );
   }
 

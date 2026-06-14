@@ -2,13 +2,15 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutDashboard, Repeat, History, HelpCircle, Settings, X, LogOut } from "lucide-react";
+import { LayoutDashboard, Repeat, History, HelpCircle, Settings, X, LogOut, Target, BarChart3 } from "lucide-react";
 import { createClient } from "@/lib/supabase-client";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/recorrentes", label: "Recorrentes", icon: Repeat },
   { href: "/auditoria", label: "Histórico", icon: History },
+  { href: "/metas", label: "Metas", icon: Target },
+  { href: "/relatorios", label: "Relatórios", icon: BarChart3 },
   { href: "/ajuda", label: "Ajuda", icon: HelpCircle },
   { href: "/settings", label: "Configurações", icon: Settings },
 ];

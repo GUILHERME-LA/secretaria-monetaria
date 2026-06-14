@@ -11,6 +11,10 @@ import {
   monthLabel,
 } from "@/lib/utils";
 import { autoCriarRecorrentes } from "@/lib/auto-criar-recorrentes";
+import { generateInsights } from "@/lib/insights-engine";
+import { useDashboardPrefs, type WidgetKey } from "@/lib/dashboard-prefs";
+import { createClient } from "@/lib/supabase-client";
+import type { User } from "@supabase/supabase-js";
 import { Header } from "@/components/Header";
 import { DashboardCards } from "@/components/DashboardCards";
 import { MonthSelector } from "@/components/MonthSelector";
@@ -19,9 +23,32 @@ import { ExpensePieChart } from "@/components/ExpensePieChart";
 import { ExpenseRanking } from "@/components/ExpenseRanking";
 import { MonthlyBarChart } from "@/components/MonthlyBarChart";
 import { TransactionList } from "@/components/TransactionList";
+import { FinancialInsights } from "@/components/FinancialInsights";
+import { FinancialHealth } from "@/components/FinancialHealth";
+import { FinancialCalendar } from "@/components/FinancialCalendar";
+import { MetasDashboard, type Meta } from "@/components/MetasDashboard";
 import { ChatFab } from "@/components/ChatFab";
 import { WelcomeTutorial } from "@/components/WelcomeTutorial";
+import { Modal } from "@/components/ui/Modal";
 import { seedDefaultCategories } from "@/lib/seed-categories";
+import { Settings2 } from "lucide-react";
+
+const METAS_KEY = "sm_metas";
+
+function loadMetas(): Meta[] {
+  try {
+    return JSON.parse(localStorage.getItem(METAS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+const widgetLabels: Record<WidgetKey, string> = {
+  insights: "Insights Inteligentes",
+  calendar: "Calendário Financeiro",
+  metas: "Metas Financeiras",
+  charts: "Gráficos e Evolução",
+};
 
 export default function DashboardPage() {
   const hoje = getCurrentMonth();
@@ -29,6 +56,9 @@ export default function DashboardPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [availableMonths, setAvailableMonths] = useState<string[]>([hoje]);
   const [mostrarPrevistas, setMostrarPrevistas] = useState(true);
+  const [customizeOpen, setCustomizeOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const { prefs, toggle } = useDashboardPrefs(userId);
 
   const [receitas, setReceitas] = useState(0);
   const [despesas, setDespesas] = useState(0);
@@ -48,6 +78,16 @@ export default function DashboardPage() {
   >([]);
   const [variacaoReceitas, setVariacaoReceitas] = useState<number | null>(null);
   const [variacaoDespesas, setVariacaoDespesas] = useState<number | null>(null);
+  const [metas, setMetas] = useState<Meta[]>([]);
+  const [eventosCalendario, setEventosCalendario] = useState<
+    { id: string; descricao: string; valor: number; data: string; tipo: "receita" | "despesa"; categoria_cor?: string }[]
+  >([]);
+
+  useEffect(() => {
+    createClient()
+      .auth.getUser()
+      .then(({ data: { user } }: { data: { user: User | null } }) => setUserId(user?.id || null));
+  }, []);
 
   const loadMonths = useCallback(async () => {
     const res = await fetch("/api/db", {
@@ -63,6 +103,54 @@ export default function DashboardPage() {
     getNextNMonths(hoje, 12).forEach((m) => meses.add(m));
     const sorted = Array.from(meses).sort();
     setAvailableMonths(sorted);
+  }, [hoje]);
+
+  const loadCalendar = useCallback(async () => {
+    const resRec = await fetch("/api/db", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "listar_recorrentes_ativos", payload: {} }),
+    });
+    const { data: recorrentes } = await resRec.json();
+
+    const resTrans = await fetch("/api/db", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "listar_transacoes_mes", payload: { inicio: `${hoje}-01`, fim: `${hoje}-31` } }),
+    });
+    const { data: transacoes } = await resTrans.json();
+
+    const eventos: any[] = [];
+    if (recorrentes) {
+      recorrentes.forEach((r: any) => {
+        const dataStr = `${hoje}-${String(r.dia_vencimento).padStart(2, "0")}`;
+        if (dataStr >= `${hoje}-01`) {
+          eventos.push({
+            id: `rec-${r.id}`,
+            descricao: r.descricao,
+            valor: Number(r.valor),
+            data: dataStr,
+            tipo: r.tipo,
+            categoria_cor: r.categoria_cor,
+          });
+        }
+      });
+    }
+    if (transacoes) {
+      transacoes
+        .filter((t: any) => t.status === "pendente" && t.data >= `${hoje}-01`)
+        .forEach((t: any) => {
+          eventos.push({
+            id: t.id,
+            descricao: t.descricao,
+            valor: Number(t.valor),
+            data: t.data,
+            tipo: t.tipo,
+            categoria_cor: t.categoria_cor,
+          });
+        });
+    }
+    setEventosCalendario(eventos);
   }, [hoje]);
 
   const loadDashboard = useCallback(async () => {
@@ -183,6 +271,10 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    setMetas(loadMetas());
+  }, [refreshKey]);
+
+  useEffect(() => {
     loadMonths();
     if (month === hoje) {
       autoCriarRecorrentes().then((c) => {
@@ -194,19 +286,45 @@ export default function DashboardPage() {
   useEffect(() => {
     loadDashboard();
     loadComparativo();
-  }, [loadDashboard, loadComparativo, refreshKey]);
+    loadCalendar();
+  }, [loadDashboard, loadComparativo, loadCalendar, refreshKey]);
 
   function handleRefresh() {
     setRefreshKey((k) => k + 1);
   }
+
+  const insights = generateInsights(
+    receitas,
+    despesas,
+    variacaoReceitas,
+    variacaoDespesas,
+    pieData,
+    comparativo
+  );
+
+  const sparklineReceitas = comparativo.map((m) => m.receitas);
+  const sparklineDespesas = comparativo.map((m) => m.despesas);
+
+  const saldoMedio =
+    comparativo.length > 0
+      ? comparativo.reduce((s, m) => s + (m.receitas - m.despesas), 0) / comparativo.length
+      : 0;
 
   return (
     <>
       <Header />
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+          <div className="flex items-center gap-3">
             <MonthSelector months={availableMonths} value={month} onChange={setMonth} />
+            <button
+              onClick={() => setCustomizeOpen(true)}
+              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border)] px-3 py-2 text-xs font-medium text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+              title="Personalizar dashboard"
+            >
+              <Settings2 size={14} />
+              <span className="hidden sm:inline">Personalizar</span>
+            </button>
           </div>
           <NewTransactionButton onDone={handleRefresh} currentMonth={hoje} />
         </div>
@@ -218,7 +336,26 @@ export default function DashboardPage() {
           previstoDespesas={mostrarPrevistas ? previstoDespesas : 0}
           variacaoReceitas={variacaoReceitas}
           variacaoDespesas={variacaoDespesas}
+          sparklineReceitas={sparklineReceitas}
+          sparklineDespesas={sparklineDespesas}
         />
+
+        {prefs.insights && (
+          <div className="mt-8">
+            <FinancialInsights insights={insights} />
+          </div>
+        )}
+
+        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <FinancialHealth
+            score={0}
+            receitas={receitas}
+            despesas={despesas}
+            recentMonths={comparativo}
+            saldoMedio={saldoMedio}
+          />
+          {prefs.calendar && <FinancialCalendar eventos={eventosCalendario} />}
+        </div>
 
         <div className="mt-8 mb-6 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-[var(--foreground)]">
@@ -243,23 +380,63 @@ export default function DashboardPage() {
           </label>
         </div>
 
-        <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <ExpensePieChart data={pieData} />
-          <ExpenseRanking data={rankingData} />
-        </div>
+        {prefs.charts && (
+          <>
+            <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <ExpensePieChart data={pieData} />
+              <ExpenseRanking data={rankingData} />
+            </div>
 
-        <div className="mb-8">
-          <MonthlyBarChart
-            data={comparativo}
-            previstoData={mostrarPrevistas ? comparativoTotal : undefined}
-          />
-        </div>
+            <div className="mb-8">
+              <MonthlyBarChart
+                data={comparativo}
+                previstoData={mostrarPrevistas ? comparativoTotal : undefined}
+              />
+            </div>
+          </>
+        )}
+
+        {prefs.metas && (
+          <div className="mb-8">
+            <MetasDashboard
+              metas={metas}
+              onOpenPage={() => window.location.href = "/metas"}
+            />
+          </div>
+        )}
 
         <TransactionList month={month} refreshKey={refreshKey} currentMonth={hoje} />
       </main>
 
       <ChatFab onDone={handleRefresh} />
       <WelcomeTutorial />
+
+      <Modal open={customizeOpen} onClose={() => setCustomizeOpen(false)} title="Personalizar Dashboard">
+        <div className="flex flex-col gap-3">
+          {(Object.keys(widgetLabels) as WidgetKey[]).map((key) => (
+            <label
+              key={key}
+              className="flex cursor-pointer items-center justify-between rounded-lg border border-[var(--border)] px-4 py-3 text-sm hover:bg-[var(--muted)]/30 transition-colors"
+            >
+              <span className="font-medium text-[var(--foreground)]">{widgetLabels[key]}</span>
+              <button
+                role="switch"
+                aria-checked={prefs[key]}
+                onClick={() => toggle(key)}
+                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
+                  prefs[key] ? "bg-[var(--accent)]" : "bg-[var(--muted)]"
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-4 w-4 rounded-full bg-white shadow ring-0 transition-transform ${
+                    prefs[key] ? "translate-x-4" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </label>
+          ))}
+        </div>
+      </Modal>
     </>
   );
 }
