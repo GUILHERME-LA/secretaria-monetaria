@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Loader2, Check, Sparkles } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { formatCurrency } from "@/lib/utils";
 import { Textarea } from "./ui/Textarea";
 
@@ -27,6 +28,27 @@ export function ChatFab({ onDone }: { onDone: () => void }) {
       inputRef.current.focus();
     }
   }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  function toggle() {
+    if (!open) {
+      setPreview(null);
+      setErro("");
+      setSuccess(false);
+      setMessage("");
+    }
+    setOpen((v) => !v);
+  }
 
   async function handleSend() {
     if (!message.trim() || loading) return;
@@ -115,118 +137,137 @@ export function ChatFab({ onDone }: { onDone: () => void }) {
 
   return (
     <>
-      {/* FAB */}
       <button
         id="tour-chat"
-        onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+        onClick={toggle}
+        className="fixed bottom-6 right-6 z-50 flex h-14 w-14 cursor-pointer items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-lg transition-transform active:scale-95"
       >
         {open ? <X size={24} /> : <MessageCircle size={24} />}
       </button>
 
-      {/* Bolha de chat */}
-      {open && (
-        <div className="fixed bottom-24 right-3 sm:right-6 z-50 w-[calc(100vw-1.5rem)] max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-2xl">
-          <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-3">
-            <Sparkles size={16} style={{ color: "var(--accent)" }} />
-            <span className="text-sm font-semibold text-[var(--foreground)]">
-              Adicionar com IA
-            </span>
-          </div>
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="fixed inset-0 z-40 bg-black/30 sm:hidden"
+              onClick={toggle}
+            />
 
-          <div className="p-4">
-            {success ? (
-              <div className="flex flex-col items-center gap-2 py-4 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10">
-                  <Check size={20} className="text-green-500" />
-                </div>
-                <p className="text-sm font-medium text-green-500">
-                  Transação adicionada!
-                </p>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 12 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              className="fixed bottom-24 right-3 sm:right-6 z-50 w-[calc(100vw-1.5rem)] max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--card)] shadow-2xl"
+              style={{ overscrollBehavior: "contain" }}
+            >
+              <div className="flex items-center gap-2 border-b border-[var(--border)] px-4 py-3">
+                <Sparkles size={16} style={{ color: "var(--accent)" }} />
+                <span className="text-sm font-semibold text-[var(--foreground)]">
+                  Adicionar com IA
+                </span>
               </div>
-            ) : preview ? (
-              <div className="flex flex-col gap-3">
-                <p className="text-xs text-[var(--muted-foreground)]">
-                  Confira o que entendi:
-                </p>
-                <div className="rounded-xl border border-[var(--border)] bg-[var(--muted)] p-3">
-                  <div className="mb-1 flex items-center gap-2">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                        preview.tipo === "receita"
-                          ? "bg-green-500/10 text-green-500"
-                          : "bg-red-500/10 text-red-500"
-                      }`}
-                    >
-                      {preview.tipo === "receita" ? "Receita" : "Despesa"}
-                    </span>
-                    <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-[10px] font-medium" style={{ color: "var(--accent)" }}>
-                      {preview.categoria}
-                    </span>
+
+              <div className="p-4">
+                {success ? (
+                  <div className="flex flex-col items-center gap-2 py-4 text-center">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10">
+                      <Check size={20} className="text-green-500" />
+                    </div>
+                    <p className="text-sm font-medium text-green-500">
+                      Transação adicionada!
+                    </p>
                   </div>
-                  <p className="text-sm font-medium text-[var(--foreground)]">
-                    {preview.descricao}
-                  </p>
-                  <p className="text-lg font-bold text-[var(--foreground)]">
-                    {formatCurrency(preview.valor)}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      setPreview(null);
-                      setErro("");
-                    }}
-                    className="flex-1 cursor-pointer rounded-lg border border-[var(--border)] py-2 text-sm font-medium text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleConfirm}
-                    disabled={loading}
-                    className="flex-1 cursor-pointer rounded-lg bg-[var(--accent)] py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
-                  >
-                    {loading ? "Adicionando..." : "Adicionar"}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                <p className="text-xs text-[var(--muted-foreground)]">
-                  Descreva o gasto ou receita do seu jeito:
-                </p>
-                <Textarea
-                  ref={inputRef}
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Ex: comprei um sorvete de 10 reais"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      handleSend();
-                    }
-                  }}
-                />
-                {erro && (
-                  <p className="text-xs text-red-500">{erro}</p>
+                ) : preview ? (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-xs text-[var(--muted-foreground)]">
+                      Confira o que entendi:
+                    </p>
+                    <div className="rounded-xl border border-[var(--border)] bg-[var(--muted)] p-3">
+                      <div className="mb-1 flex items-center gap-2">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                            preview.tipo === "receita"
+                              ? "bg-green-500/10 text-green-500"
+                              : "bg-red-500/10 text-red-500"
+                          }`}
+                        >
+                          {preview.tipo === "receita" ? "Receita" : "Despesa"}
+                        </span>
+                        <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-[10px] font-medium" style={{ color: "var(--accent)" }}>
+                          {preview.categoria}
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium text-[var(--foreground)]">
+                        {preview.descricao}
+                      </p>
+                      <p className="text-lg font-bold text-[var(--foreground)]">
+                        {formatCurrency(preview.valor)}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => {
+                          setPreview(null);
+                          setErro("");
+                        }}
+                        className="min-h-[44px] flex-1 cursor-pointer rounded-lg border border-[var(--border)] py-2 text-sm font-medium text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handleConfirm}
+                        disabled={loading}
+                        className="min-h-[44px] flex-1 cursor-pointer rounded-lg bg-[var(--accent)] py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
+                      >
+                        {loading ? "Adicionando..." : "Adicionar"}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <p className="text-xs text-[var(--muted-foreground)]">
+                      Descreva o gasto ou receita do seu jeito:
+                    </p>
+                    <Textarea
+                      ref={inputRef}
+                      value={message}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Ex: comprei um sorvete de 10 reais"
+                      style={{ fontSize: 16, WebkitTextSizeAdjust: "100%" }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSend();
+                        }
+                      }}
+                    />
+                    {erro && (
+                      <p className="text-xs text-red-500">{erro}</p>
+                    )}
+                    <button
+                      onClick={handleSend}
+                      disabled={!message.trim() || loading}
+                      className="min-h-[44px] flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-[var(--accent)] py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40"
+                    >
+                      {loading ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Send size={16} />
+                      )}
+                      {loading ? "Analisando..." : "Enviar"}
+                    </button>
+                  </div>
                 )}
-                <button
-                  onClick={handleSend}
-                  disabled={!message.trim() || loading}
-                  className="flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-[var(--accent)] py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-40"
-                >
-                  {loading ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : (
-                    <Send size={16} />
-                  )}
-                  {loading ? "Analisando..." : "Enviar"}
-                </button>
               </div>
-            )}
-          </div>
-        </div>
-      )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }

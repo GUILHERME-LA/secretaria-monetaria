@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { TransitionProvider } from "@/components/TransitionProvider";
 
 export const metadata: Metadata = {
   title: "Secretaria Monetária",
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="dark">
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <TransitionProvider>{children}</TransitionProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
