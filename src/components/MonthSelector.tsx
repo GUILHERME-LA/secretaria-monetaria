@@ -29,7 +29,7 @@ export function MonthSelector({ months, value, onChange }: Props) {
       <button
         onClick={prev}
         disabled={!temAnterior}
-        className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <ChevronLeft size={18} />
       </button>
@@ -37,7 +37,7 @@ export function MonthSelector({ months, value, onChange }: Props) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm font-medium text-[var(--foreground)] outline-none max-w-[170px] sm:max-w-none truncate"
+        className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--card)] px-3 py-2 text-sm font-medium text-[var(--foreground)] outline-none shadow-sm transition-shadow hover:shadow-md focus:ring-2 focus:ring-[var(--ring)] max-w-[170px] sm:max-w-none truncate"
       >
         {months.map((m) => (
           <option key={m} value={m}>
@@ -49,7 +49,7 @@ export function MonthSelector({ months, value, onChange }: Props) {
       <button
         onClick={next}
         disabled={!temProximo}
-        className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
       >
         <ChevronRight size={18} />
       </button>

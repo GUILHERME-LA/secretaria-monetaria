@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowDown, ArrowUp, Wallet } from "lucide-react";
+import { ArrowDown, ArrowUp, Wallet, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Card } from "./ui/Card";
 import { formatCurrency } from "@/lib/utils";
 
@@ -10,84 +10,125 @@ type Props = {
   despesas: number;
   previstoReceitas?: number;
   previstoDespesas?: number;
+  variacaoReceitas?: number | null;
+  variacaoDespesas?: number | null;
 };
 
-const cardVariants = {
-  initial: { opacity: 0, y: 12 },
-  animate: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { delay: i * 0.06, duration: 0.25, ease: "easeOut" as const },
-  }),
-};
-
-export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previstoDespesas = 0 }: Props) {
+export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previstoDespesas = 0, variacaoReceitas, variacaoDespesas }: Props) {
   const saldo = receitas - despesas;
 
-  const items = [
-    {
-      icon: <ArrowUp size={22} />,
-      iconBg: "bg-green-500/10",
-      iconColor: "text-green-500",
-      label: "Recebido",
-      value: receitas,
-      valueColor: "text-green-500",
-      previsto: previstoReceitas > 0 ? `+${formatCurrency(previstoReceitas)} previsto` : null,
-    },
-    {
-      icon: <ArrowDown size={22} />,
-      iconBg: "bg-red-500/10",
-      iconColor: "text-red-500",
-      label: "Gasto",
-      value: despesas,
-      valueColor: "text-red-500",
-      previsto: previstoDespesas > 0 ? `+${formatCurrency(previstoDespesas)} previsto` : null,
-    },
-    {
-      icon: <Wallet size={22} />,
-      iconBg: "bg-[var(--accent)]/10",
-      iconColor: "text-[var(--accent)]",
-      label: "Saldo",
-      value: saldo,
-      valueColor: saldo >= 0 ? "text-green-500" : "text-red-500",
-      previsto: null,
-    },
-  ];
+  function TrendBadge({ value, good }: { value: number; good: "up" | "down" }) {
+    const isUp = value > 0;
+    const isGood = good === "up" ? isUp : !isUp;
+    const Icon = value === 0 ? Minus : isUp ? TrendingUp : TrendingDown;
+    return (
+      <span className={`inline-flex items-center gap-1 text-xs ${value === 0 ? "text-[var(--muted-foreground)]" : isGood ? "text-green-500" : "text-red-500"}`}>
+        <Icon size={12} />
+        {Math.abs(value)}%
+      </span>
+    );
+  }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      {items.map((item, i) => (
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="lg:col-span-2"
+      >
+        <Card className="relative overflow-hidden">
+          <div className="absolute right-0 top-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-[var(--accent)]/5 blur-2xl" />
+          <div className="relative flex items-center gap-4">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent)]/20 to-[var(--accent)]/5">
+              <Wallet size={30} style={{ color: "var(--accent)" }} />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-medium text-[var(--muted-foreground)]">Saldo do período</p>
+              <p className={`text-4xl font-bold tracking-tight sm:text-5xl ${saldo >= 0 ? "text-green-500" : "text-red-500"}`}>
+                {formatCurrency(saldo)}
+              </p>
+              <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                {receitas > 0 || despesas > 0
+                  ? saldo >= 0
+                    ? "Receitas superam despesas este mês"
+                    : "Despesas superam receitas este mês"
+                  : "Nenhuma transação registrada"}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </motion.div>
+
+      <div className="flex flex-col gap-4">
         <motion.div
-          key={item.label}
-          custom={i}
-          variants={cardVariants}
-          initial="initial"
-          animate="animate"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.06, duration: 0.25, ease: "easeOut" }}
           whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
         >
           <Card>
             <div className="flex items-center gap-3">
-              <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${item.iconBg}`}>
-                <span className={item.iconColor}>{item.icon}</span>
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
+                <ArrowUp size={20} className="text-green-500" />
               </div>
-              <div>
-                <p className="text-xs font-medium text-[var(--muted-foreground)]">
-                  {item.label}
+              <div className="flex-1">
+                <p className="text-xs font-medium text-[var(--muted-foreground)]">Recebido</p>
+                <p className="text-xl font-bold tracking-tight text-green-500">
+                  {formatCurrency(receitas)}
                 </p>
-                <p className={`text-2xl font-bold tracking-tight ${item.valueColor}`}>
-                  {formatCurrency(item.value)}
-                </p>
-                {item.previsto && (
-                  <p className="text-xs text-[var(--muted-foreground)]">
-                    {item.previsto}
-                  </p>
-                )}
+                <div className="mt-0.5 flex items-center gap-2">
+                  {variacaoReceitas !== null && variacaoReceitas !== undefined && (
+                    <TrendBadge value={variacaoReceitas} good="up" />
+                  )}
+                  {variacaoReceitas !== null && variacaoReceitas !== undefined && (
+                    <span className="text-xs text-[var(--muted-foreground)]">vs mês anterior</span>
+                  )}
+                  {previstoReceitas > 0 && (
+                    <span className="text-xs text-[var(--muted-foreground)]">
+                      +{formatCurrency(previstoReceitas)} previsto
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </Card>
         </motion.div>
-      ))}
+
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.25, ease: "easeOut" }}
+          whileHover={{ scale: 1.02 }}
+        >
+          <Card>
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10">
+                <ArrowDown size={20} className="text-red-500" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-medium text-[var(--muted-foreground)]">Gasto</p>
+                <p className="text-xl font-bold tracking-tight text-red-500">
+                  {formatCurrency(despesas)}
+                </p>
+                <div className="mt-0.5 flex items-center gap-2">
+                  {variacaoDespesas !== null && variacaoDespesas !== undefined && (
+                    <TrendBadge value={variacaoDespesas} good="down" />
+                  )}
+                  {variacaoDespesas !== null && variacaoDespesas !== undefined && (
+                    <span className="text-xs text-[var(--muted-foreground)]">vs mês anterior</span>
+                  )}
+                  {previstoDespesas > 0 && (
+                    <span className="text-xs text-[var(--muted-foreground)]">
+                      +{formatCurrency(previstoDespesas)} previsto
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      </div>
     </div>
   );
 }

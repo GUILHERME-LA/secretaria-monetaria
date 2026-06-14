@@ -20,7 +20,7 @@ export function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-lg">
+      <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--background)]/80 backdrop-blur-lg shadow-sm">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 sm:gap-6">
             <button
@@ -41,7 +41,7 @@ export function Header() {
               </span>
             </button>
 
-            <nav className="hidden lg:flex items-center gap-1">
+            <nav className="hidden lg:flex items-center gap-0.5">
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 const active = pathname === link.href;
@@ -49,14 +49,17 @@ export function Header() {
                   <button
                     key={link.href}
                     onClick={() => router.push(link.href)}
-                    className={`flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    className={`relative flex cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       active
-                        ? "text-[var(--accent)] bg-[var(--accent)]/10"
-                        : "text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
+                        ? "text-[var(--accent)]"
+                        : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                     }`}
                   >
                     <Icon size={16} />
                     <span>{link.label}</span>
+                    {active && (
+                      <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-[var(--accent)]" />
+                    )}
                   </button>
                 );
               })}

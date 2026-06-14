@@ -12,7 +12,7 @@ export function ExpenseRanking({ data }: Props) {
     return (
       <Card>
         <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
-          Top Categorias
+          Onde mais gastei
         </h3>
         <p className="py-6 text-center text-sm text-[var(--muted-foreground)]">
           Nenhuma despesa registrada.
@@ -23,18 +23,25 @@ export function ExpenseRanking({ data }: Props) {
 
   const maxValor = data[0]?.valor || 1;
 
+  function rank(i: number) {
+    if (i === 0) return <span className="text-amber-500">1</span>;
+    if (i === 1) return <span className="text-slate-400">2</span>;
+    if (i === 2) return <span className="text-orange-700">3</span>;
+    return <span className="text-[var(--muted-foreground)]">{i + 1}</span>;
+  }
+
   return (
     <Card>
       <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
         Onde mais gastei
       </h3>
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         {data.map((item, idx) => (
           <div key={item.nome}>
-            <div className="mb-1 flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-[var(--muted-foreground)]">
-                  {idx + 1}
+            <div className="mb-1.5 flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--muted)] text-xs font-bold">
+                  {rank(idx)}
                 </span>
                 <span className="text-[var(--foreground)]">{item.nome}</span>
               </div>
@@ -42,9 +49,9 @@ export function ExpenseRanking({ data }: Props) {
                 {formatCurrency(item.valor)}
               </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-[var(--muted)]">
+            <div className="h-3 overflow-hidden rounded-full bg-[var(--muted)]">
               <div
-                className="h-full rounded-full transition-all"
+                className="h-full rounded-full transition-all duration-500"
                 style={{
                   width: `${(item.valor / maxValor) * 100}%`,
                   backgroundColor: item.cor,

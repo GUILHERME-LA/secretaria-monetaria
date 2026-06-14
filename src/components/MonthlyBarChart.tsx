@@ -31,10 +31,10 @@ export function MonthlyBarChart({ data, previstoData }: Props) {
   return (
     <Card>
       <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
-        Comparativo Mensal
+        Evolução Mensal
       </h3>
-      <ResponsiveContainer width="100%" height={260}>
-        <BarChart data={merged}>
+      <ResponsiveContainer width="100%" height={280}>
+        <BarChart data={merged} margin={{ top: 8, right: 8, left: -8, bottom: 0 }}>
           <XAxis
             dataKey="mes"
             tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
@@ -56,8 +56,9 @@ export function MonthlyBarChart({ data, previstoData }: Props) {
             contentStyle={{
               background: "var(--card)",
               border: "1px solid var(--border)",
-              borderRadius: "8px",
+              borderRadius: "12px",
               fontSize: "13px",
+              boxShadow: "var(--shadow-lg)",
               pointerEvents: "none",
             }}
             formatter={(value: any, name: any) => {
@@ -76,12 +77,14 @@ export function MonthlyBarChart({ data, previstoData }: Props) {
           />
           <Legend
             wrapperStyle={{ fontSize: 12, color: "var(--foreground)" }}
+            iconType="circle"
+            iconSize={8}
           />
           <Bar
             dataKey="receitas"
             name="Receita"
             fill="#22c55e"
-            radius={[4, 4, 0, 0]}
+            radius={[6, 6, 0, 0]}
             stackId="receitas"
             isAnimationActive={true}
           />
@@ -89,8 +92,8 @@ export function MonthlyBarChart({ data, previstoData }: Props) {
             dataKey="receitasPrevistas"
             name="Receita (Prevista)"
             fill="#22c55e"
-            fillOpacity={0.3}
-            radius={[4, 4, 0, 0]}
+            fillOpacity={0.25}
+            radius={[6, 6, 0, 0]}
             stackId="receitas"
             isAnimationActive={true}
           />
@@ -98,7 +101,7 @@ export function MonthlyBarChart({ data, previstoData }: Props) {
             dataKey="despesas"
             name="Despesa"
             fill="#ef4444"
-            radius={[4, 4, 0, 0]}
+            radius={[6, 6, 0, 0]}
             stackId="despesas"
             isAnimationActive={true}
           />
@@ -106,8 +109,8 @@ export function MonthlyBarChart({ data, previstoData }: Props) {
             dataKey="despesasPrevistas"
             name="Despesa (Prevista)"
             fill="#ef4444"
-            fillOpacity={0.3}
-            radius={[4, 4, 0, 0]}
+            fillOpacity={0.25}
+            radius={[6, 6, 0, 0]}
             stackId="despesas"
             isAnimationActive={true}
           />

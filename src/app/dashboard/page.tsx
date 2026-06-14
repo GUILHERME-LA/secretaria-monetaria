@@ -46,6 +46,8 @@ export default function DashboardPage() {
   const [comparativoTotal, setComparativoTotal] = useState<
     { mes: string; receitas: number; despesas: number }[]
   >([]);
+  const [variacaoReceitas, setVariacaoReceitas] = useState<number | null>(null);
+  const [variacaoDespesas, setVariacaoDespesas] = useState<number | null>(null);
 
   const loadMonths = useCallback(async () => {
     const res = await fetch("/api/db", {
@@ -159,6 +161,21 @@ export default function DashboardPage() {
 
     setComparativo(realizados);
     setComparativoTotal(totais);
+
+    if (realizados.length >= 2) {
+      const atual = realizados[realizados.length - 1];
+      const anterior = realizados[realizados.length - 2];
+      setVariacaoReceitas(
+        anterior.receitas > 0
+          ? Math.round(((atual.receitas - anterior.receitas) / anterior.receitas) * 100)
+          : atual.receitas > 0 ? 100 : null
+      );
+      setVariacaoDespesas(
+        anterior.despesas > 0
+          ? Math.round(((atual.despesas - anterior.despesas) / anterior.despesas) * 100)
+          : atual.despesas > 0 ? 100 : null
+      );
+    }
   }, [month]);
 
   useEffect(() => {
@@ -187,21 +204,23 @@ export default function DashboardPage() {
     <>
       <Header />
       <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <MonthSelector months={availableMonths} value={month} onChange={setMonth} />
+        <div className="mb-6 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <MonthSelector months={availableMonths} value={month} onChange={setMonth} />
+          </div>
           <NewTransactionButton onDone={handleRefresh} currentMonth={hoje} />
         </div>
 
-        <div className="mb-8">
-          <DashboardCards
-            receitas={receitas}
-            despesas={despesas}
-            previstoReceitas={mostrarPrevistas ? previstoReceitas : 0}
-            previstoDespesas={mostrarPrevistas ? previstoDespesas : 0}
-          />
-        </div>
+        <DashboardCards
+          receitas={receitas}
+          despesas={despesas}
+          previstoReceitas={mostrarPrevistas ? previstoReceitas : 0}
+          previstoDespesas={mostrarPrevistas ? previstoDespesas : 0}
+          variacaoReceitas={variacaoReceitas}
+          variacaoDespesas={variacaoDespesas}
+        />
 
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mt-8 mb-6 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-[var(--foreground)]">
             Visão Geral
           </h2>

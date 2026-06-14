@@ -2,12 +2,15 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Card } from "./ui/Card";
+import { formatCurrency } from "@/lib/utils";
 
 type Props = {
   data: { nome: string; cor: string; valor: number }[];
 };
 
 export function ExpensePieChart({ data }: Props) {
+  const total = data.reduce((s, i) => s + i.valor, 0);
+
   if (data.length === 0) {
     return (
       <Card>
@@ -47,8 +50,9 @@ export function ExpensePieChart({ data }: Props) {
             contentStyle={{
               background: "var(--card)",
               border: "1px solid var(--border)",
-              borderRadius: "8px",
+              borderRadius: "12px",
               fontSize: "13px",
+              boxShadow: "var(--shadow-lg)",
               pointerEvents: "none",
             }}
             formatter={(value) =>
@@ -62,14 +66,17 @@ export function ExpensePieChart({ data }: Props) {
           />
         </PieChart>
       </ResponsiveContainer>
-      <div className="mt-3 flex flex-wrap gap-2" style={{ pointerEvents: "none" }}>
+      <div className="mt-4 flex flex-wrap gap-3" style={{ pointerEvents: "none" }}>
         {data.map((item) => (
           <div key={item.nome} className="flex items-center gap-1.5 text-xs">
             <span
-              className="h-2.5 w-2.5 rounded-full"
+              className="h-3 w-3 rounded-full"
               style={{ backgroundColor: item.cor }}
             />
             <span className="text-[var(--muted-foreground)]">{item.nome}</span>
+            <span className="font-medium text-[var(--foreground)]">
+              {((item.valor / total) * 100).toFixed(1)}%
+            </span>
           </div>
         ))}
       </div>
