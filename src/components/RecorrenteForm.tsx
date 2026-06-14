@@ -44,9 +44,16 @@ export function RecorrenteForm({ onDone, initial }: Props) {
     };
 
     if (initial?.id) {
-      await supabase.from("sm_recorrentes").update(payload).eq("id", initial.id);
+      const { error: updateError } = await supabase.from("sm_recorrentes").update(payload).eq("id", initial.id);
+      if (updateError) { setLoading(false); alert(updateError.message); return; }
     } else {
-      await supabase.from("sm_recorrentes").insert(payload);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
+      const { error: insertError } = await supabase.from("sm_recorrentes").insert({
+        ...payload,
+        user_id: user.id,
+      });
+      if (insertError) { setLoading(false); alert(insertError.message); return; }
     }
 
     setLoading(false);

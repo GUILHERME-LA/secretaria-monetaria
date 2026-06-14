@@ -39,11 +39,18 @@ export function CategorySelect({ tipo, value, onChange }: Props) {
 
   async function criarCategoria() {
     if (!novaCat.trim()) return;
-    await supabase.from("sm_categorias").insert({
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    const { error } = await supabase.from("sm_categorias").insert({
+      user_id: user.id,
       nome: novaCat.trim(),
       tipo,
       cor: novaCor,
     });
+    if (error) {
+      alert("Erro ao criar categoria: " + error.message);
+      return;
+    }
     setNovaCat("");
     setOpen(false);
     loadedTipo.current = null;
@@ -91,7 +98,7 @@ export function CategorySelect({ tipo, value, onChange }: Props) {
               className="h-10 w-full cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--card)]"
             />
           </div>
-          <Button onClick={criarCategoria}>Criar Categoria</Button>
+          <Button type="button" onClick={criarCategoria}>Criar Categoria</Button>
         </div>
       </Modal>
     </div>

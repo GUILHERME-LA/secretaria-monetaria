@@ -82,7 +82,15 @@ export function ChatFab({ onDone }: { onDone: () => void }) {
       return;
     }
 
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setErro("Usuário não autenticado.");
+      setLoading(false);
+      return;
+    }
+
     const { error } = await supabase.from("sm_transacoes").insert({
+      user_id: user.id,
       tipo: preview.tipo,
       categoria_id,
       descricao: preview.descricao,
@@ -91,7 +99,7 @@ export function ChatFab({ onDone }: { onDone: () => void }) {
     });
 
     if (error) {
-      setErro("Erro ao salvar.");
+      setErro("Erro ao salvar: " + error.message);
       setLoading(false);
       return;
     }

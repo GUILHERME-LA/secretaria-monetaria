@@ -9,6 +9,9 @@ export async function autoCriarRecorrentes() {
   const mesAtual = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const ultimoDia = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 0;
+
   const { data: recorrentes } = await supabase
     .from("sm_recorrentes")
     .select("id, categoria_id, descricao, valor, tipo, dia_vencimento")
@@ -39,6 +42,7 @@ export async function autoCriarRecorrentes() {
     const data = `${mesAtual}-${String(dia).padStart(2, "0")}`;
 
     const { error } = await supabase.from("sm_transacoes").insert({
+      user_id: user.id,
       categoria_id: rec.categoria_id,
       descricao: rec.descricao,
       valor: rec.valor,

@@ -27,6 +27,7 @@ export function TransactionForm({ onDone, initial, currentMonth }: Props) {
   );
   const [justificativa, setJustificativa] = useState("");
   const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -80,7 +81,11 @@ export function TransactionForm({ onDone, initial, currentMonth }: Props) {
         },
       });
     } else {
-      await supabase.from("sm_transacoes").insert({
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error: insertError } = await supabase.from("sm_transacoes").insert({
+        user_id: user.id,
         tipo,
         categoria_id: categoriaId,
         descricao,
@@ -88,6 +93,11 @@ export function TransactionForm({ onDone, initial, currentMonth }: Props) {
         data: novaData,
         status,
       });
+      if (insertError) {
+        setErro(insertError.message);
+        setLoading(false);
+        return;
+      }
     }
 
     setLoading(false);
@@ -159,6 +169,10 @@ export function TransactionForm({ onDone, initial, currentMonth }: Props) {
           onChange={(e) => setJustificativa(e.target.value)}
           required
         />
+      )}
+
+      {erro && (
+        <p className="text-sm text-red-500">{erro}</p>
       )}
 
       <Button type="submit" disabled={loading || (editando && !justificativa.trim())}>
