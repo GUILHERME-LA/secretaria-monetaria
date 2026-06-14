@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { RecorrenteForm } from "@/components/RecorrenteForm";
-import { Plus, Pencil, ToggleLeft, ToggleRight, Repeat, ArrowRight, HelpCircle } from "lucide-react";
+import { Plus, Pencil, ToggleLeft, ToggleRight, Repeat, ArrowRight, HelpCircle, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function RecorrentesPage() {
@@ -18,6 +18,7 @@ export default function RecorrentesPage() {
   const [recorrentes, setRecorrentes] = useState<(Recorrente & { categoria_nome?: string })[]>([]);
   const [open, setOpen] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   async function load() {
     const res = await fetch("/api/db", {
@@ -42,6 +43,16 @@ export default function RecorrentesPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "toggle_recorrente", payload: { id: r.id } }),
     });
+    load();
+  }
+
+  async function limparInativas() {
+    await fetch("/api/db", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "excluir_recorrentes_inativos", payload: {} }),
+    });
+    setConfirmDeleteOpen(false);
     load();
   }
 
@@ -73,14 +84,21 @@ export default function RecorrentesPage() {
               Automatize receitas e despesas que acontecem todos os meses.
             </p>
           </div>
-          <Button
-            onClick={() => {
-              setEditItem(null);
-              setOpen(true);
-            }}
-          >
-            <Plus size={18} /> Nova Recorrência
-          </Button>
+          <div className="flex gap-3">
+            {recorrentes.length - ativos.length > 0 && (
+              <Button variant="secondary" onClick={() => setConfirmDeleteOpen(true)}>
+                <Trash2 size={18} /> Limpar {recorrentes.length - ativos.length} inativa{(recorrentes.length - ativos.length) !== 1 ? 's' : ''}
+              </Button>
+            )}
+            <Button
+              onClick={() => {
+                setEditItem(null);
+                setOpen(true);
+              }}
+            >
+              <Plus size={18} /> Nova Recorrência
+            </Button>
+          </div>
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -303,6 +321,21 @@ export default function RecorrentesPage() {
           }}
           initial={editItem}
         />
+      </Modal>
+
+      <Modal open={confirmDeleteOpen} onClose={() => setConfirmDeleteOpen(false)} title="Limpar recorrências inativas">
+        <div className="flex flex-col gap-4">
+          <p className="text-sm text-[var(--foreground)]">
+            Tem certeza que deseja apagar permanentemente <strong>{recorrentes.length - ativos.length} recorrência{(recorrentes.length - ativos.length) !== 1 ? 's' : ''} inativa{(recorrentes.length - ativos.length) !== 1 ? 's' : ''}</strong>?
+          </p>
+          <p className="text-xs text-[var(--muted-foreground)]">
+            Esta ação não pode ser desfeita.
+          </p>
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setConfirmDeleteOpen(false)}>Cancelar</Button>
+            <Button onClick={limparInativas}>Apagar</Button>
+          </div>
+        </div>
       </Modal>
     </>
   );

@@ -100,6 +100,14 @@ export async function POST(request: NextRequest) {
         await pool.query("SELECT toggle_recorrente($1, $2)", [user.id, payload.id]);
         return NextResponse.json({ success: true, data: null });
 
+      case "excluir_recorrente":
+        await pool.query("SELECT excluir_recorrente($1, $2)", [user.id, payload.id]);
+        return NextResponse.json({ success: true, data: null });
+
+      case "excluir_recorrentes_inativos":
+        await pool.query("SELECT excluir_recorrentes_inativos($1)", [user.id]);
+        return NextResponse.json({ success: true, data: null });
+
       case "listar_recorrentes_ativos":
         result = await pool.query("SELECT listar_recorrentes_ativos_json($1) AS data", [user.id]);
         return NextResponse.json({ success: true, data: result.rows[0]?.data || [] });
