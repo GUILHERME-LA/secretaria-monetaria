@@ -9,6 +9,8 @@ const CATEGORIAS_PADRAO = [
   { nome: "Saúde",         tipo: "despesa",  cor: "#ec4899" },
   { nome: "Educação",      tipo: "despesa",  cor: "#06b6d4" },
   { nome: "Assinaturas",   tipo: "despesa",  cor: "#6366f1" },
+  { nome: "Outros",        tipo: "despesa",  cor: "#808080" },
+  { nome: "Outros",        tipo: "receita",  cor: "#808080" },
 ];
 
 export async function seedDefaultCategories() {

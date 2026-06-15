@@ -12,6 +12,7 @@ type PreviewData = {
   valor: number;
   categoria: string;
   data: string;
+  criar_categoria?: boolean;
 };
 
 export function ChatFab({ onDone }: { onDone: () => void }) {
@@ -86,14 +87,28 @@ export function ChatFab({ onDone }: { onDone: () => void }) {
     if (!preview) return;
     setLoading(true);
 
-    const resCat = await fetch("/api/db", {
+    let resCat = await fetch("/api/db", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "buscar_categoria", payload: { nome: preview.categoria, tipo: preview.tipo } }),
     });
-    const { data: cats } = await resCat.json();
-    const catRow = Array.isArray(cats) ? cats[0] : cats;
-    const categoria_id = catRow?.id;
+    let { data: cats } = await resCat.json();
+    let catRow = Array.isArray(cats) ? cats[0] : cats;
+    let categoria_id = catRow?.id;
+
+    if (!categoria_id && preview.criar_categoria) {
+      const color = `#${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0")}`;
+      const createRes = await fetch("/api/db", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "inserir_categoria",
+          payload: { nome: preview.categoria, tipo: preview.tipo, cor: color },
+        }),
+      });
+      const { data: newCat } = await createRes.json();
+      categoria_id = newCat?.id;
+    }
 
     if (!categoria_id) {
       setErro(`Categoria "${preview.categoria}" não encontrada.`);
@@ -200,6 +215,9 @@ export function ChatFab({ onDone }: { onDone: () => void }) {
                         </span>
                         <span className="rounded-full bg-[var(--accent)]/10 px-2 py-0.5 text-[10px] font-medium" style={{ color: "var(--accent)" }}>
                           {preview.categoria}
+                          {preview.criar_categoria && (
+                            <span className="ml-1">+nova</span>
+                          )}
                         </span>
                       </div>
                       <p className="text-sm font-medium text-[var(--foreground)]">
@@ -224,7 +242,7 @@ export function ChatFab({ onDone }: { onDone: () => void }) {
                         disabled={loading}
                         className="min-h-[44px] flex-1 cursor-pointer rounded-lg bg-[var(--accent)] py-2 text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-50"
                       >
-                        {loading ? "Adicionando..." : "Adicionar"}
+                        {loading ? "Adicionando..." : preview.criar_categoria ? "Criar e adicionar" : "Adicionar"}
                       </button>
                     </div>
                   </div>

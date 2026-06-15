@@ -12,6 +12,8 @@ interface Transaction {
   descricao: string;
   valor: number;
   tipo: "receita" | "despesa";
+  categoria?: string;
+  criar_categoria?: boolean;
   categoria_nubank?: string;
   identificador?: string;
 }
@@ -27,6 +29,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
+    const userId = user.id;
+
     const { transactions } = (await request.json()) as {
       transactions: Transaction[];
     };
@@ -38,26 +42,57 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const catResult = await pool.query(
-      `SELECT id FROM sm_categorias WHERE user_id = $1 LIMIT 1`,
-      [user.id]
-    );
+    const catCache: Record<string, string> = {};
 
-    let categoriaId: string;
-    if (catResult.rows.length > 0) {
-      categoriaId = catResult.rows[0].id;
-    } else {
-      const insert = await pool.query(
-        `SELECT seed_categoria($1, $2, $3, $4)`,
-        [user.id, "Geral", "despesa", "#808080"]
+    async function getCategoryId(catName: string, tipo: string, criar: boolean): Promise<string> {
+      const key = `${catName}:${tipo}`;
+      if (catCache[key]) return catCache[key];
+
+      const found = await pool.query(
+        `SELECT id FROM sm_categorias WHERE user_id = $1 AND nome = $2 AND tipo = $3 LIMIT 1`,
+        [userId, catName, tipo]
       );
-      categoriaId = insert.rows[0]?.seed_categoria;
-      if (!categoriaId) {
-        return NextResponse.json(
-          { error: "Erro ao criar categoria padrão" },
-          { status: 500 }
-        );
+
+      if (found.rows.length > 0) {
+        catCache[key] = found.rows[0].id;
+        return found.rows[0].id;
       }
+
+      if (criar) {
+        const color = `#${Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0")}`;
+        const insert = await pool.query(
+          `SELECT inserir_categoria($1, $2, $3, $4) AS id`,
+          [userId, catName, tipo, color]
+        );
+        const newId = insert.rows[0]?.id;
+        if (newId) {
+          catCache[key] = newId;
+          return newId;
+        }
+      }
+
+      const fallback = await pool.query(
+        `SELECT id FROM sm_categorias WHERE user_id = $1 AND nome = 'Outros' AND tipo = $2 LIMIT 1`,
+        [userId, tipo]
+      );
+
+      if (fallback.rows.length > 0) {
+        catCache[key] = fallback.rows[0].id;
+        return fallback.rows[0].id;
+      }
+
+      const color = "#808080";
+      const insert = await pool.query(
+        `SELECT inserir_categoria($1, $2, $3, $4) AS id`,
+        [userId, "Outros", tipo, color]
+      );
+      const fallbackId = insert.rows[0]?.id;
+      if (fallbackId) {
+        catCache[key] = fallbackId;
+        return fallbackId;
+      }
+
+      throw new Error("Não foi possível obter uma categoria válida");
     }
 
     let importadas = 0;
@@ -74,7 +109,7 @@ export async function POST(request: NextRequest) {
         const exists = await pool.query(
           `SELECT id FROM sm_transacoes
            WHERE user_id = $1 AND data = $2 AND descricao = $3 AND valor = $4`,
-          [user.id, t.date, t.descricao, t.valor]
+          [userId, t.date, t.descricao, t.valor]
         );
 
         if (exists.rows.length > 0) {
@@ -82,9 +117,12 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
+        const catName = t.categoria || "Outros";
+        const categoriaId = await getCategoryId(catName, t.tipo, !!t.criar_categoria);
+
         await pool.query(
           `SELECT inserir_transacao($1, $2, $3, $4, $5, $6, $7)`,
-          [user.id, t.tipo, categoriaId, t.descricao, t.valor, t.date, "confirmada"]
+          [userId, t.tipo, categoriaId, t.descricao, t.valor, t.date, "confirmada"]
         );
         importadas++;
       } catch {

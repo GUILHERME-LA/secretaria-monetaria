@@ -1,29 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerSupabase } from "@/lib/supabase-server";
+import { Pool } from "pg";
 
-const CATEGORIAS_RECEITA = ["Salário", "Freela / Extra", "Investimentos"];
-const CATEGORIAS_DESPESA = [
-  "Alimentação",
-  "Transporte",
-  "Moradia",
-  "Lazer",
-  "Saúde",
-  "Educação",
-  "Assinaturas",
-];
-
-const SYSTEM_PROMPT = `Você é um assistente financeiro. Extraia os dados de uma transação da mensagem do usuário.
-
-Categorias disponíveis:
-- receita: ${CATEGORIAS_RECEITA.join(", ")}
-- despesa: ${CATEGORIAS_DESPESA.join(", ")}
-
-Responda APENAS com um JSON sem formatação adicional, sem markdown, sem acentos:
-{"tipo":"receita ou despesa","descricao":"texto curto","valor":numero,"categoria":"nome da categoria","data":"YYYY-MM-DD (use a data atual se não mencionada)"}
-
-Se não conseguir extrair, retorne: {"erro":"mensagem explicativa em português"}`;
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 1,
+});
 
 const OLLAMA_CLOUD_URL = "https://ollama.com/api/chat";
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen3:8b-cloud";
+
+function buildSystemPrompt(categoriesByType: Record<string, string[]>) {
+  const receita = categoriesByType.receita || [];
+  const despesa = categoriesByType.despesa || [];
+
+  return `Você é um assistente financeiro que extrai dados de transações de mensagens do usuário.
+
+Categorias existentes do usuário:
+- receita: ${receita.join(", ") || "(nenhuma)"}
+- despesa: ${despesa.join(", ") || "(nenhuma)"}
+
+Regras:
+1. Analise a mensagem e extraia: tipo (receita/despesa), descrição curta, valor numérico, categoria, data
+2. Se a descrição se encaixa em uma categoria existente, use-a
+3. Se não se encaixa em nenhuma existente, crie uma nova categoria (retorne "criar_categoria": true)
+4. Para categorias novas, escolha um nome curto e claro em português
+5. Se não tiver certeza, use "Outros"
+6. Considere contexto brasileiro: "mercado" = Alimentação, "uber" = Transporte, "aluguel" = Moradia, "ifood" = Alimentação, "netflix" = Assinaturas, etc.
+7. Se a mensagem não for sobre uma transação financeira, retorne {"erro": "mensagem explicativa"}
+
+Responda APENAS com JSON, sem markdown, sem formatação:
+{"tipo":"receita ou despesa","descricao":"texto curto","valor":numero,"categoria":"nome da categoria","data":"YYYY-MM-DD","criar_categoria":false}
+
+Se criar_categoria=true, a categoria será criada automaticamente.`;
+}
 
 export async function POST(request: NextRequest) {
   const { message } = await request.json();
@@ -41,6 +51,25 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const supabase = await createServerSupabase();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) {
+      return NextResponse.json({ erro: "Não autorizado" }, { status: 401 });
+    }
+
+    const catResult = await pool.query(
+      `SELECT nome, tipo FROM sm_categorias WHERE user_id = $1`,
+      [user.id]
+    );
+
+    const categoriesByType: Record<string, string[]> = { receita: [], despesa: [] };
+    for (const row of catResult.rows) {
+      categoriesByType[row.tipo]?.push(row.nome);
+    }
+
     const res = await fetch(OLLAMA_CLOUD_URL, {
       method: "POST",
       headers: {
@@ -50,7 +79,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         model: OLLAMA_MODEL,
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: buildSystemPrompt(categoriesByType) },
           { role: "user", content: message },
         ],
         stream: false,
