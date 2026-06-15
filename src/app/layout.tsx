@@ -6,6 +6,9 @@ import { TransitionProvider } from "@/components/TransitionProvider";
 export const metadata: Metadata = {
   title: "Secretaria Monetária",
   description: "Controle financeiro pessoal",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
