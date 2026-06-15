@@ -1,11 +1,21 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { TransitionProvider } from "@/components/TransitionProvider";
+import { ServiceWorkerRegistration } from "./components/sw-registration";
 
 export const metadata: Metadata = {
   title: "Secretaria Monetária",
-  description: "Controle financeiro pessoal",
+  description: "Controle financeiro pessoal inteligente",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "SecMon",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: [
       { url: "/icon.svg", type: "image/svg+xml" },
@@ -17,6 +27,14 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -24,7 +42,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" className="dark">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+      </head>
       <body>
+        <ServiceWorkerRegistration />
         <ThemeProvider>
           <TransitionProvider>{children}</TransitionProvider>
         </ThemeProvider>
