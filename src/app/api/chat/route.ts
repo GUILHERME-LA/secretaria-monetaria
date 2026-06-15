@@ -98,8 +98,12 @@ export async function POST(request: NextRequest) {
     const data = await res.json();
     const text = data?.message?.content || "";
 
-    const cleaned = text.replace(/```json\s*/gi, "").replace(/```/g, "").trim();
-    const parsed = JSON.parse(cleaned);
+    const jsonStart = text.indexOf("{");
+    const jsonEnd = text.lastIndexOf("}");
+    if (jsonStart === -1 || jsonEnd === -1) {
+      return NextResponse.json({ erro: "Não consegui processar. Tente novamente." });
+    }
+    const parsed = JSON.parse(text.substring(jsonStart, jsonEnd + 1));
 
     if (parsed.erro) {
       return NextResponse.json({ erro: parsed.erro });
