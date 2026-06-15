@@ -13,6 +13,7 @@ import { MonthSelector } from "@/components/MonthSelector";
 import { ExpensePieChart } from "@/components/ExpensePieChart";
 import { ExpenseRanking } from "@/components/ExpenseRanking";
 import { TransactionList } from "@/components/TransactionList";
+import { CategoryBreakdown } from "@/components/CategoryBreakdown";
 import { formatCurrency, getCurrentMonth, getMonthBounds, getLast6Months, monthLabel } from "@/lib/utils";
 
 export default function RelatoriosPage() {
@@ -284,6 +285,8 @@ export default function RelatoriosPage() {
               <ExpensePieChart data={pieData} />
               <ExpenseRanking data={rankingData} />
             </div>
+
+            <CategoryBreakdown transactions={transacoes} tipo="despesa" />
 
             <TransactionList month={month} refreshKey={0} />
 
