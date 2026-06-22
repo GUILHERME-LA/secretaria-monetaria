@@ -2,12 +2,17 @@
 
 import { motion } from "framer-motion";
 import { Lightbulb } from "lucide-react";
-import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Insight } from "@/lib/insights-engine";
 
 type Props = {
   insights: Insight[];
+};
+
+const typeStyles: Record<string, { bg: string; border: string }> = {
+  negative: { bg: "bg-red-500/8", border: "border-red-500/20" },
+  positive: { bg: "bg-emerald-500/8", border: "border-emerald-500/20" },
+  info: { bg: "bg-[var(--accent)]/8", border: "border-[var(--accent)]/20" },
 };
 
 export function FinancialInsights({ insights }: Props) {
@@ -22,29 +27,34 @@ export function FinancialInsights({ insights }: Props) {
   }
 
   return (
-    <Card>
+    <div>
       <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
         Insights
       </h3>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {insights.map((item, idx) => (
-          <motion.div
-            key={item.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.06, duration: 0.2 }}
-            className="rounded-xl border border-[var(--border)] bg-[var(--muted)]/30 p-3"
-          >
-            <span className="block text-lg leading-none">{item.icon}</span>
-            <p className="mt-1.5 text-xs font-semibold text-[var(--foreground)]">
-              {item.title}
-            </p>
-            <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">
-              {item.description}
-            </p>
-          </motion.div>
-        ))}
+      <div className="flex flex-wrap gap-3">
+        {insights.map((item, idx) => {
+          const style = typeStyles[item.type] || typeStyles.info;
+          return (
+            <motion.div
+              key={item.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.06, duration: 0.2 }}
+              className={`flex items-start gap-3 rounded-xl border px-4 py-3 ${style.bg} ${style.border}`}
+            >
+              <span className="mt-0.5 block text-lg leading-none">{item.icon}</span>
+              <div>
+                <p className="text-xs font-semibold text-[var(--foreground)]">
+                  {item.title}
+                </p>
+                <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">
+                  {item.description}
+                </p>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
-    </Card>
+    </div>
   );
 }

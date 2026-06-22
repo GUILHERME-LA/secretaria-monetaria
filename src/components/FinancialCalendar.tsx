@@ -86,7 +86,7 @@ export function FinancialCalendar({ eventos }: Props) {
               <div className="flex shrink-0 flex-col items-end gap-0.5">
                 <span
                   className={`text-xs font-semibold ${
-                    ev.tipo === "receita" ? "text-green-500" : "text-red-500"
+                    ev.tipo === "receita" ? "text-emerald-500" : "text-red-500"
                   }`}
                 >
                   {ev.tipo === "receita" ? "+" : "-"}

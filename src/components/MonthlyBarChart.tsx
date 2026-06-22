@@ -105,7 +105,7 @@ export function MonthlyBarChart({ data, previstoData }: Props) {
           <Bar
             dataKey="receitas"
             name="Receita"
-            fill="#22c55e"
+            fill="#10B981"
             radius={[6, 6, 0, 0]}
             stackId="receitas"
             isAnimationActive={true}
@@ -113,7 +113,7 @@ export function MonthlyBarChart({ data, previstoData }: Props) {
           <Bar
             dataKey="receitasPrevistas"
             name="Receita (Prevista)"
-            fill="#22c55e"
+            fill="#10B981"
             fillOpacity={0.25}
             radius={[6, 6, 0, 0]}
             stackId="receitas"

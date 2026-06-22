@@ -25,7 +25,7 @@ export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previ
     const isGood = good === "up" ? isUp : !isUp;
     const Icon = value === 0 ? Minus : isUp ? TrendingUp : TrendingDown;
     return (
-      <span className={`inline-flex items-center gap-1 text-xs ${value === 0 ? "text-[var(--muted-foreground)]" : isGood ? "text-green-500" : "text-red-500"}`}>
+      <span className={`inline-flex items-center gap-1 text-xs ${value === 0 ? "text-[var(--muted-foreground)]" : isGood ? "text-emerald-500" : "text-red-500"}`}>
         <Icon size={12} />
         {Math.abs(value)}%
       </span>
@@ -48,7 +48,7 @@ export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previ
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-[var(--muted-foreground)]">Saldo do período</p>
-              <p className={`text-4xl font-bold tracking-tight sm:text-5xl ${saldo >= 0 ? "text-green-500" : "text-red-500"}`}>
+              <p className={`text-4xl font-bold tracking-tight sm:text-5xl ${saldo >= 0 ? "text-emerald-500" : "text-red-500"}`}>
                 {formatCurrency(saldo)}
               </p>
               <p className="mt-1 text-sm text-[var(--muted-foreground)]">
@@ -72,12 +72,12 @@ export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previ
         >
           <Card>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-500/10">
-                <ArrowUp size={20} className="text-green-500" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
+                <ArrowUp size={20} className="text-emerald-500" />
               </div>
               <div className="flex-1">
                 <p className="text-xs font-medium text-[var(--muted-foreground)]">Recebido</p>
-                <p className="text-xl font-bold tracking-tight text-green-500">
+                <p className="text-xl font-bold tracking-tight text-emerald-500">
                   {formatCurrency(receitas)}
                 </p>
                 <div className="mt-0.5 flex items-center gap-2">
@@ -95,7 +95,7 @@ export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previ
                 </div>
                 {sparklineReceitas && sparklineReceitas.length >= 2 && (
                   <div className="mt-2">
-                    <SparklineChart data={sparklineReceitas} color="#22c55e" />
+                    <SparklineChart data={sparklineReceitas} color="#10B981" />
                   </div>
                 )}
               </div>

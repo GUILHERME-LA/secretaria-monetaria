@@ -274,10 +274,10 @@ export function ChatFab({ onDone }: { onDone: () => void }) {
               <div className="p-4">
                 {success ? (
                   <div className="flex flex-col items-center gap-2 py-4 text-center">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10">
-                      <Check size={20} className="text-green-500" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/10">
+                      <Check size={20} className="text-emerald-500" />
                     </div>
-                    <p className="text-sm font-medium text-green-500">
+                    <p className="text-sm font-medium text-emerald-500">
                       Transação adicionada!
                     </p>
                   </div>
@@ -291,7 +291,7 @@ export function ChatFab({ onDone }: { onDone: () => void }) {
                         <span
                           className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
                             preview.tipo === "receita"
-                              ? "bg-green-500/10 text-green-500"
+                              ? "bg-emerald-500/10 text-emerald-500"
                               : "bg-red-500/10 text-red-500"
                           }`}
                         >
@@ -347,7 +347,7 @@ export function ChatFab({ onDone }: { onDone: () => void }) {
                           {attached.file.name}
                         </span>
                         {attached.processed && (
-                          <Check size={12} className="shrink-0 text-green-500" />
+                          <Check size={12} className="shrink-0 text-emerald-500" />
                         )}
                         <button
                           onClick={() => setAttached(null)}

@@ -120,11 +120,11 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
         <div className="flex min-w-0 flex-1 items-center gap-3">
           <div
             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-              t.tipo === "receita" ? "bg-green-500/10" : "bg-red-500/10"
+              t.tipo === "receita" ? "bg-emerald-500/10" : "bg-red-500/10"
             }`}
           >
             {t.tipo === "receita" ? (
-              <ArrowUp size={14} className="text-green-500" />
+              <ArrowUp size={14} className="text-emerald-500" />
             ) : (
               <ArrowDown size={14} className="text-red-500" />
             )}
@@ -151,7 +151,7 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
         <div className="flex items-center gap-1 pl-2 sm:gap-2 sm:pl-3">
           <span
             className={`shrink-0 font-semibold tabular-nums ${
-              t.tipo === "receita" ? "text-green-500" : "text-red-500"
+              t.tipo === "receita" ? "text-emerald-500" : "text-red-500"
             }`}
           >
             {t.tipo === "receita" ? "+" : "-"}
@@ -160,7 +160,7 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
           {t.status === "pendente" && (
             <button
               onClick={() => confirmar(t.id)}
-              className="cursor-pointer rounded-lg p-2 text-green-500 hover:bg-green-500/10 transition-colors"
+              className="cursor-pointer rounded-lg p-2 text-emerald-500 hover:bg-emerald-500/10 transition-colors"
               title="Confirmar"
             >
               <Check size={16} />
@@ -206,7 +206,7 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
         <div className="flex flex-col gap-3">
           {receitas.length > 0 && (
             <div>
-              <p className="mb-2 text-xs font-semibold text-green-500 uppercase tracking-wider">
+              <p className="mb-2 text-xs font-semibold text-emerald-500 uppercase tracking-wider">
                 Receitas
               </p>
               <div className="flex flex-col gap-2">

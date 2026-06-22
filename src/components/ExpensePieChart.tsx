@@ -28,43 +28,51 @@ export function ExpensePieChart({ data }: Props) {
       <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
         Gastos por Categoria
       </h3>
-      <ResponsiveContainer width="100%" height={240}>
-        <PieChart>
-          <Pie
-            data={data}
-            dataKey="valor"
-            nameKey="nome"
-            cx="50%"
-            cy="50%"
-            innerRadius={60}
-            outerRadius={100}
-            paddingAngle={3}
-            isAnimationActive={true}
-          >
-            {data.map((entry, idx) => (
-              <Cell key={idx} fill={entry.cor} />
-            ))}
-          </Pie>
-          <Tooltip
-            contentStyle={{
-              background: "var(--card)",
-              border: "1px solid var(--border)",
-              borderRadius: "12px",
-              fontSize: "13px",
-              boxShadow: "var(--shadow-lg)",
-              pointerEvents: "none",
-            }}
-            formatter={(value) =>
-              typeof value === "number"
-                ? value.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })
-                : value
-            }
-          />
-        </PieChart>
-      </ResponsiveContainer>
+      <div className="relative">
+        <ResponsiveContainer width="100%" height={240}>
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey="valor"
+              nameKey="nome"
+              cx="50%"
+              cy="50%"
+              innerRadius={60}
+              outerRadius={100}
+              paddingAngle={3}
+              isAnimationActive={true}
+            >
+              {data.map((entry, idx) => (
+                <Cell key={idx} fill={entry.cor} />
+              ))}
+            </Pie>
+            <Tooltip
+              contentStyle={{
+                background: "var(--card)",
+                border: "1px solid var(--border)",
+                borderRadius: "12px",
+                fontSize: "13px",
+                boxShadow: "var(--shadow-lg)",
+                pointerEvents: "none",
+              }}
+              formatter={(value) =>
+                typeof value === "number"
+                  ? value.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })
+                  : value
+              }
+            />
+          </PieChart>
+        </ResponsiveContainer>
+        <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+          <p className="text-lg font-bold tracking-tight text-[var(--foreground)]">
+            {formatCurrency(total)}
+          </p>
+          <p className="text-xs text-[var(--muted-foreground)]">Total gasto</p>
+        </div>
+      </div>
       <div className="mt-4 flex flex-wrap gap-3" style={{ pointerEvents: "none" }}>
         {data.map((item) => (
           <div key={item.nome} className="flex items-center gap-1.5 text-xs">

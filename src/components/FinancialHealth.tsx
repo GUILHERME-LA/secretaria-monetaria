@@ -63,7 +63,7 @@ function calcScore(
   const final = Math.min(Math.max(pontos, 0), 100);
 
   if (final >= 70)
-    return { score: final, label: "Excelente", color: "#22c55e", icon: Sparkles };
+    return { score: final, label: "Excelente", color: "#10B981", icon: Sparkles };
   if (final >= 40)
     return { score: final, label: "Bom", color: "#eab308", icon: Smile };
   return { score: final, label: "Atenção", color: "#ef4444", icon: AlertTriangle };

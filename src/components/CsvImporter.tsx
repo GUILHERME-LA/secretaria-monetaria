@@ -172,14 +172,14 @@ export function CsvImporter() {
     return (
       <div className="rounded-2xl border border-green-500/20 bg-green-500/5 p-6 text-center">
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-500/10">
-          <Check size={28} className="text-green-500" />
+          <Check size={28} className="text-emerald-500" />
         </div>
         <h3 className="text-lg font-bold text-[var(--foreground)]">
           Importação concluída!
         </h3>
         <div className="mt-3 flex justify-center gap-6 text-sm">
           <div>
-            <p className="text-2xl font-bold text-green-500">{result.importadas}</p>
+            <p className="text-2xl font-bold text-emerald-500">{result.importadas}</p>
             <p className="text-[var(--muted-foreground)]">importadas</p>
           </div>
           <div>
@@ -263,7 +263,7 @@ export function CsvImporter() {
               <p className="text-xs text-[var(--muted-foreground)]">total</p>
             </div>
             <div className="rounded-xl bg-green-500/10 p-4 text-center">
-              <p className="text-2xl font-bold text-green-500">
+              <p className="text-2xl font-bold text-emerald-500">
                 {parsed.filter((t) => t.tipo === "receita").length}
               </p>
               <p className="text-xs text-[var(--muted-foreground)]">receitas</p>
@@ -382,7 +382,7 @@ function GroupRow({ group }: { group: CategoryGroup }) {
                   }`}
                 >
                   {t.tipo === "receita" ? (
-                    <ArrowUp size={11} className="text-green-500" />
+                    <ArrowUp size={11} className="text-emerald-500" />
                   ) : (
                     <ArrowDown size={11} className="text-red-500" />
                   )}
@@ -394,7 +394,7 @@ function GroupRow({ group }: { group: CategoryGroup }) {
               </div>
               <span
                 className={`text-sm font-semibold ${
-                  t.tipo === "receita" ? "text-green-500" : "text-red-500"
+                  t.tipo === "receita" ? "text-emerald-500" : "text-red-500"
                 }`}
               >
                 -{formatCurrency(t.valor)}

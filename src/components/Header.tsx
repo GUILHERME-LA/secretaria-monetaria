@@ -39,8 +39,11 @@ export function Header() {
               className="flex cursor-pointer items-center gap-2"
               id="tour-header"
             >
-              <span className="text-lg font-bold tracking-tight text-[var(--foreground)]">
-                ✦ Secretaria Monetária
+              <span className="text-lg font-bold tracking-tight">
+                <span className="bg-gradient-to-r from-[var(--accent)] to-blue-400 bg-clip-text text-transparent">
+                  ✦
+                </span>{" "}
+                Secretaria Monetária
               </span>
             </button>
 

@@ -139,7 +139,7 @@ export function CategoryBreakdown({ transactions, tipo = "despesa" }: Props) {
                                 }`}
                               >
                                 {t.tipo === "receita" ? (
-                                  <ArrowUp size={11} className="text-green-500" />
+                                  <ArrowUp size={11} className="text-emerald-500" />
                                 ) : (
                                   <ArrowDown size={11} className="text-red-500" />
                                 )}
@@ -156,7 +156,7 @@ export function CategoryBreakdown({ transactions, tipo = "despesa" }: Props) {
                             <span
                               className={`text-sm font-semibold ${
                                 t.tipo === "receita"
-                                  ? "text-green-500"
+                                  ? "text-emerald-500"
                                   : "text-red-500"
                               }`}
                             >

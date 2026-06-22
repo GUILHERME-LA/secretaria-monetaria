@@ -15,7 +15,7 @@ const slides = [
   },
   {
     target: "#tour-nova-transacao",
-    icon: <ListTodo size={24} className="text-green-500" />,
+    icon: <ListTodo size={24} className="text-emerald-500" />,
     title: "Transações",
     desc: "Clique aqui para adicionar gastos ou receitas. Você também pode editar, excluir e organizar por categoria.",
   },

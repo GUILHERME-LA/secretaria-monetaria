@@ -58,8 +58,11 @@ export function SideDrawer({ open, onClose }: Props) {
             className="fixed left-0 top-0 z-50 flex h-full w-72 flex-col border-r border-[var(--border)] bg-[var(--background)] shadow-2xl"
           >
             <div className="flex items-center justify-between border-b border-[var(--border)] px-5 py-4">
-              <span className="text-base font-bold tracking-tight text-[var(--foreground)]">
-                ✦ Secretaria Monetária
+              <span className="text-base font-bold tracking-tight">
+                <span className="bg-gradient-to-r from-[var(--accent)] to-blue-400 bg-clip-text text-transparent">
+                  ✦
+                </span>{" "}
+                Secretaria Monetária
               </span>
               <button
                 onClick={onClose}
