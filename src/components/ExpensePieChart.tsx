@@ -79,7 +79,7 @@ export function ExpensePieChart({ data }: Props) {
           {data.map((item) => {
             const pct = (item.valor / total) * 100;
             return (
-              <div key={item.nome} className="flex min-w-0 items-center gap-2 overflow-hidden text-xs">
+              <div key={item.nome} className="flex min-w-0 items-center gap-2 text-xs">
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ backgroundColor: item.cor }}
