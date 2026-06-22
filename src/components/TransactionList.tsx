@@ -280,7 +280,7 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
         </div>
 
         <div className="overflow-x-auto">
-          <div className="hidden lg:grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium uppercase tracking-wider text-slate-400">
+          <div className="hidden sm:grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium uppercase tracking-wider text-slate-400">
             <button
               onClick={() => toggleSort("descricao")}
               className="col-span-5 flex cursor-pointer items-center gap-1 text-left transition-colors hover:text-[var(--foreground)]"
@@ -309,93 +309,61 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
 
           <div className="flex flex-col">
             {paginated.map((t, idx) => (
-              <div
-                key={t.id}
-                className={`flex flex-col gap-1.5 px-4 py-3 text-sm transition-colors hover:bg-[var(--muted)]/50 lg:grid lg:grid-cols-12 lg:items-center lg:gap-4 ${
-                  t.status === "pendente" ? "opacity-70" : ""
-                } ${idx < paginated.length - 1 ? "border-b border-[var(--border)]" : ""}`}
-              >
-                <div className="flex items-center justify-between gap-2 lg:col-span-5">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                        t.tipo === "receita" ? "bg-emerald-500/10" : "bg-red-500/10"
-                      }`}
-                    >
-                      {t.tipo === "receita" ? (
-                        <ArrowUp size={14} className="text-emerald-500" />
-                      ) : (
-                        <ArrowDown size={14} className="text-red-500" />
-                      )}
+              <div key={t.id} className={`${idx < paginated.length - 1 ? "border-b border-[var(--border)]" : ""} ${t.status === "pendente" ? "opacity-70" : ""}`}>
+
+                <div className="flex flex-col gap-1.5 px-4 py-3 text-sm transition-colors hover:bg-[var(--muted)]/50 sm:hidden">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${t.tipo === "receita" ? "bg-emerald-500/10" : "bg-red-500/10"}`}>
+                        {t.tipo === "receita" ? <ArrowUp size={14} className="text-emerald-500" /> : <ArrowDown size={14} className="text-red-500" />}
+                      </div>
+                      <p className="truncate font-medium text-[var(--foreground)]/80">{t.descricao}</p>
                     </div>
-                    <p className="truncate font-medium text-[var(--foreground)]/80">
-                      {t.descricao}
-                    </p>
+                    <span className={`shrink-0 font-semibold tabular-nums ${t.tipo === "receita" ? "text-emerald-500" : "text-red-500"}`}>
+                      {t.tipo === "receita" ? "+" : "-"}{formatCurrency(t.valor)}
+                    </span>
                   </div>
-                  <span
-                    className={`shrink-0 font-semibold tabular-nums ${
-                      t.tipo === "receita" ? "text-emerald-500" : "text-red-500"
-                    }`}
-                  >
-                    {t.tipo === "receita" ? "+" : "-"}
-                    {formatCurrency(t.valor)}
-                  </span>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="inline-block shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium" style={{ backgroundColor: `${t.categoria_cor || "#6366f1"}15`, color: t.categoria_cor || "#6366f1", borderColor: `${t.categoria_cor || "#6366f1"}25` }}>
+                        {t.categoria_nome}
+                      </span>
+                      {t.status === "pendente" && <span className="shrink-0 rounded bg-yellow-500/10 px-1.5 py-0.5 text-[10px] text-yellow-500 font-medium">Previsto</span>}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      {t.status === "pendente" && <button onClick={() => confirmar(t.id)} className="cursor-pointer rounded-lg p-2 text-emerald-500 hover:bg-emerald-500/10 transition-colors" title="Confirmar"><Check size={16} /></button>}
+                      <button onClick={() => setEditItem({ ...t, categoria_id: t.categoria_id, descricao: t.descricao, valor: t.valor, data: t.data, tipo: t.tipo } as Transacao)} className="cursor-pointer rounded-lg p-2 text-slate-400 hover:bg-[var(--muted)] transition-colors"><Pencil size={16} /></button>
+                      <button onClick={() => { setDeleteItem(t); setDeleteJustificativa(""); }} className="cursor-pointer rounded-lg p-2 text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-2 lg:col-span-7">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <span
-                      className="inline-block shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium"
-                      style={{
-                        backgroundColor: `${t.categoria_cor || "#6366f1"}15`,
-                        color: t.categoria_cor || "#6366f1",
-                        borderColor: `${t.categoria_cor || "#6366f1"}25`,
-                      }}
-                    >
+                <div className="hidden sm:grid sm:grid-cols-12 sm:items-center sm:gap-4 px-4 py-3 text-sm transition-colors hover:bg-[var(--muted)]/50">
+                  <div className="flex items-center gap-3 sm:col-span-5 min-w-0">
+                    <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${t.tipo === "receita" ? "bg-emerald-500/10" : "bg-red-500/10"}`}>
+                      {t.tipo === "receita" ? <ArrowUp size={14} className="text-emerald-500" /> : <ArrowDown size={14} className="text-red-500" />}
+                    </div>
+                    <p className="truncate font-medium text-[var(--foreground)]/80">{t.descricao}</p>
+                  </div>
+                  <div className="sm:col-span-3">
+                    <span className="inline-block shrink-0 rounded-full border px-2.5 py-0.5 text-xs font-medium" style={{ backgroundColor: `${t.categoria_cor || "#6366f1"}15`, color: t.categoria_cor || "#6366f1", borderColor: `${t.categoria_cor || "#6366f1"}25` }}>
                       {t.categoria_nome}
                     </span>
-                    {t.status === "pendente" && (
-                      <span className="shrink-0 rounded bg-yellow-500/10 px-1.5 py-0.5 text-[10px] text-yellow-500 font-medium">
-                        Previsto
-                      </span>
-                    )}
-                    <span className="hidden text-xs text-slate-400 lg:inline">
-                      {formatDate(t.data)}
-                    </span>
+                    {t.status === "pendente" && <span className="ml-1.5 rounded bg-yellow-500/10 px-1.5 py-0.5 text-[10px] text-yellow-500 font-medium">Previsto</span>}
                   </div>
-                  <div className="flex shrink-0 items-center gap-1">
-                    {t.status === "pendente" && (
-                      <button
-                        onClick={() => confirmar(t.id)}
-                        className="cursor-pointer rounded-lg p-2 text-emerald-500 hover:bg-emerald-500/10 transition-colors"
-                        title="Confirmar"
-                      >
-                        <Check size={16} />
-                      </button>
-                    )}
-                    <button
-                      onClick={() =>
-                        setEditItem({
-                          ...t,
-                          categoria_id: t.categoria_id,
-                          descricao: t.descricao,
-                          valor: t.valor,
-                          data: t.data,
-                          tipo: t.tipo,
-                        } as Transacao)
-                      }
-                      className="cursor-pointer rounded-lg p-2 text-slate-400 hover:bg-[var(--muted)] transition-colors"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    <button
-                      onClick={() => { setDeleteItem(t); setDeleteJustificativa(""); }}
-                      className="cursor-pointer rounded-lg p-2 text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
+                  <div className="sm:col-span-2 text-xs text-slate-400">{formatDate(t.data)}</div>
+                  <div className="flex items-center justify-end gap-2 sm:col-span-2">
+                    <span className={`shrink-0 font-semibold tabular-nums ${t.tipo === "receita" ? "text-emerald-500" : "text-red-500"}`}>
+                      {t.tipo === "receita" ? "+" : "-"}{formatCurrency(t.valor)}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      {t.status === "pendente" && <button onClick={() => confirmar(t.id)} className="cursor-pointer rounded-lg p-2 text-emerald-500 hover:bg-emerald-500/10 transition-colors" title="Confirmar"><Check size={16} /></button>}
+                      <button onClick={() => setEditItem({ ...t, categoria_id: t.categoria_id, descricao: t.descricao, valor: t.valor, data: t.data, tipo: t.tipo } as Transacao)} className="cursor-pointer rounded-lg p-2 text-slate-400 hover:bg-[var(--muted)] transition-colors"><Pencil size={16} /></button>
+                      <button onClick={() => { setDeleteItem(t); setDeleteJustificativa(""); }} className="cursor-pointer rounded-lg p-2 text-slate-400 hover:bg-red-500/10 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                    </div>
                   </div>
                 </div>
+
               </div>
             ))}
           </div>
