@@ -353,7 +353,7 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
                   </div>
                   <div className="sm:col-span-2 text-xs text-slate-400">{formatDate(t.data)}</div>
                   <div className="flex items-center justify-end sm:col-span-2">
-                    <span className={`shrink-0 font-semibold tabular-nums mr-3 ${t.tipo === "receita" ? "text-emerald-500" : "text-red-500"}`}>
+                    <span className={`w-28 shrink-0 text-right font-semibold tabular-nums ${t.tipo === "receita" ? "text-emerald-500" : "text-red-500"}`}>
                       {t.tipo === "receita" ? "+" : "-"}{formatCurrency(t.valor)}
                     </span>
                     <div className="flex w-20 shrink-0 items-center justify-end gap-1">
