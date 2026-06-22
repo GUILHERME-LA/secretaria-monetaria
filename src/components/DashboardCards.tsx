@@ -26,7 +26,7 @@ export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previ
     const Icon = value === 0 ? Minus : isUp ? TrendingUp : TrendingDown;
     return (
       <span className={`inline-flex items-center gap-1 text-xs font-medium ${value === 0 ? "text-[var(--muted-foreground)]" : isGood ? "text-emerald-500" : "text-red-500"}`}>
-        <Icon size={12} />
+        <Icon size={11} />
         {Math.abs(value)}%
       </span>
     );
@@ -74,15 +74,15 @@ export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previ
         >
           <Card>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10">
+              <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-emerald-500/10">
                 <ArrowUp size={20} className="text-emerald-500" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-medium text-slate-400">Recebido</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Recebido</p>
                 <p className="text-2xl font-bold tracking-tight text-emerald-500">
                   {formatCurrency(receitas)}
                 </p>
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
                   {variacaoReceitas !== null && variacaoReceitas !== undefined && (
                     <>
                       <TrendBadge value={variacaoReceitas} good="up" />
@@ -113,15 +113,15 @@ export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previ
         >
           <Card>
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10">
+              <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-xl bg-red-500/10">
                 <ArrowDown size={20} className="text-red-500" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-medium text-slate-400">Gasto</p>
+                <p className="text-xs font-medium uppercase tracking-wider text-slate-400">Gasto</p>
                 <p className="text-2xl font-bold tracking-tight text-red-500">
                   {formatCurrency(despesas)}
                 </p>
-                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-2.5 gap-y-1">
                   {variacaoDespesas !== null && variacaoDespesas !== undefined && (
                     <>
                       <TrendBadge value={variacaoDespesas} good="down" />
