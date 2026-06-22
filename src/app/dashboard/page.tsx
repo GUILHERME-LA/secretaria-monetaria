@@ -339,43 +339,8 @@ export default function DashboardPage() {
               <span className="hidden sm:inline">Personalizar</span>
             </button>
           </div>
-          <NewTransactionButton onDone={handleRefresh} currentMonth={hoje} />
-        </div>
-
-        <DashboardCards
-          receitas={receitas}
-          despesas={despesas}
-          previstoReceitas={mostrarPrevistas ? previstoReceitas : 0}
-          previstoDespesas={mostrarPrevistas ? previstoDespesas : 0}
-          variacaoReceitas={variacaoReceitas}
-          variacaoDespesas={variacaoDespesas}
-          sparklineReceitas={sparklineReceitas}
-          sparklineDespesas={sparklineDespesas}
-        />
-
-        {prefs.insights && (
-          <div className="mt-8">
-            <FinancialInsights insights={insights} loading={insightsLoading} />
-          </div>
-        )}
-
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <FinancialHealth
-            score={0}
-            receitas={receitas}
-            despesas={despesas}
-            recentMonths={comparativo}
-            saldoMedio={saldoMedio}
-          />
-          {prefs.calendar && <FinancialCalendar eventos={eventosCalendario} />}
-        </div>
-
-        <div className="mt-8 mb-6 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[var(--foreground)]">
-            Visão Geral
-          </h2>
           <label className="flex cursor-pointer items-center gap-2 text-sm text-[var(--foreground)]">
-            <span className="text-xs text-[var(--muted-foreground)]">Mostrar previstos</span>
+            <span className="hidden text-xs text-[var(--muted-foreground)] sm:inline">Mostrar previstos</span>
             <button
               role="switch"
               aria-checked={mostrarPrevistas}
@@ -391,26 +356,61 @@ export default function DashboardPage() {
               />
             </button>
           </label>
+          <NewTransactionButton onDone={handleRefresh} currentMonth={hoje} />
+        </div>
+
+        <DashboardCards
+          receitas={receitas}
+          despesas={despesas}
+          previstoReceitas={mostrarPrevistas ? previstoReceitas : 0}
+          previstoDespesas={mostrarPrevistas ? previstoDespesas : 0}
+          variacaoReceitas={variacaoReceitas}
+          variacaoDespesas={variacaoDespesas}
+          sparklineReceitas={sparklineReceitas}
+          sparklineDespesas={sparklineDespesas}
+        />
+
+        <div className="mt-6 flex flex-wrap gap-6">
+          {prefs.insights && (
+            <div className="min-w-[280px] flex-1">
+              <FinancialInsights insights={insights} loading={insightsLoading} />
+            </div>
+          )}
+          <div className="min-w-[280px] flex-1">
+            <FinancialHealth
+              score={0}
+              receitas={receitas}
+              despesas={despesas}
+              recentMonths={comparativo}
+              saldoMedio={saldoMedio}
+            />
+          </div>
+          {prefs.calendar && (
+            <div className="min-w-[280px] flex-1">
+              <FinancialCalendar eventos={eventosCalendario} />
+            </div>
+          )}
         </div>
 
         {prefs.charts && (
-          <>
-            <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="mt-8 flex flex-wrap gap-6">
+            <div className="min-w-[280px] flex-[2]">
               <ExpensePieChart data={pieData} />
-              <ExpenseRanking data={rankingData} />
+              <div className="mt-6">
+                <ExpenseRanking data={rankingData} />
+              </div>
             </div>
-
-            <div className="mb-8">
+            <div className="min-w-[400px] flex-[3]">
               <MonthlyBarChart
                 data={comparativo}
                 previstoData={mostrarPrevistas ? comparativoTotal : undefined}
               />
             </div>
-          </>
+          </div>
         )}
 
         {prefs.metas && (
-          <div className="mb-8">
+          <div className="mt-8">
             <MetasDashboard
               metas={metas}
               onOpenPage={() => window.location.href = "/metas"}
@@ -418,7 +418,9 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <TransactionList month={month} refreshKey={refreshKey} currentMonth={hoje} onRefresh={handleRefresh} />
+        <div className="mt-8">
+          <TransactionList month={month} refreshKey={refreshKey} currentMonth={hoje} onRefresh={handleRefresh} />
+        </div>
       </main>
 
       <WelcomeTutorial />

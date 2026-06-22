@@ -9,7 +9,7 @@ import { Button } from "./ui/Button";
 import { Modal } from "./ui/Modal";
 import { TransactionForm } from "./TransactionForm";
 import { Textarea } from "./ui/Textarea";
-import { Pencil, Trash2, Check, ArrowUp, ArrowDown, List } from "lucide-react";
+import { Pencil, Trash2, Check, ArrowUp, ArrowDown, List, ChevronLeft, ChevronRight } from "lucide-react";
 
 type Props = {
   month: string;
@@ -18,11 +18,14 @@ type Props = {
   onRefresh?: () => void;
 };
 
+const PER_PAGE = 10;
+
 export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: Props) {
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [editItem, setEditItem] = useState<Transacao | null>(null);
   const [deleteItem, setDeleteItem] = useState<Transacao | null>(null);
   const [deleteJustificativa, setDeleteJustificativa] = useState("");
+  const [page, setPage] = useState(1);
 
   const load = useCallback(async () => {
     const [ano, mes] = month.split("-").map(Number);
@@ -39,10 +42,7 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
 
     if (data) {
       setTransacoes(
-        data.map((t: any) => ({
-          ...t,
-          valor: Number(t.valor),
-        }))
+        data.map((t: any) => ({ ...t, valor: Number(t.valor) }))
       );
     }
   }, [month]);
@@ -50,6 +50,10 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
   useEffect(() => {
     load();
   }, [load, refreshKey]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [transacoes.length]);
 
   async function confirmar(id: string) {
     await fetch("/api/db", {
@@ -104,91 +108,22 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
     onRefresh?.();
   }
 
-  const receitas = transacoes.filter((t) => t.tipo === "receita");
-  const despesas = transacoes.filter((t) => t.tipo === "despesa");
+  const sorted = [...transacoes].sort((a, b) => b.data.localeCompare(a.data));
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE));
+  const paginated = sorted.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  function renderRow(t: Transacao) {
+  if (transacoes.length === 0) {
     return (
-      <div
-        key={t.id}
-        className={`flex items-center justify-between rounded-xl border px-4 py-3.5 text-sm transition-all hover:translate-x-0.5 hover:bg-[var(--muted)]/50 ${
-          t.status === "pendente"
-            ? "border-dashed border-[var(--border)] opacity-70"
-            : "border-transparent bg-[var(--muted)]/30"
-        }`}
-      >
-        <div className="flex min-w-0 flex-1 items-center gap-3">
-          <div
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-              t.tipo === "receita" ? "bg-emerald-500/10" : "bg-red-500/10"
-            }`}
-          >
-            {t.tipo === "receita" ? (
-              <ArrowUp size={14} className="text-emerald-500" />
-            ) : (
-              <ArrowDown size={14} className="text-red-500" />
-            )}
-          </div>
-          <div className="min-w-0">
-            <p className="truncate font-medium text-[var(--foreground)]">
-              {t.descricao}
-            </p>
-            <p className="flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]">
-              <span
-                className="inline-block h-2 w-2 rounded-full"
-                style={{ backgroundColor: t.categoria_cor || "#6366f1" }}
-              />
-              {t.categoria_nome}
-              {t.status === "pendente" && (
-                <span className="rounded bg-yellow-500/10 px-1.5 py-0.5 text-[10px] text-yellow-500 font-medium">
-                  Previsto
-                </span>
-              )}
-              <span className="hidden sm:inline">{formatDate(t.data)}</span>
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-1 pl-2 sm:gap-2 sm:pl-3">
-          <span
-            className={`shrink-0 font-semibold tabular-nums ${
-              t.tipo === "receita" ? "text-emerald-500" : "text-red-500"
-            }`}
-          >
-            {t.tipo === "receita" ? "+" : "-"}
-            {formatCurrency(t.valor)}
-          </span>
-          {t.status === "pendente" && (
-            <button
-              onClick={() => confirmar(t.id)}
-              className="cursor-pointer rounded-lg p-2 text-emerald-500 hover:bg-emerald-500/10 transition-colors"
-              title="Confirmar"
-            >
-              <Check size={16} />
-            </button>
-          )}
-          <button
-            onClick={() =>
-              setEditItem({
-                ...t,
-                categoria_id: t.categoria_id,
-                descricao: t.descricao,
-                valor: t.valor,
-                data: t.data,
-                tipo: t.tipo,
-              } as Transacao)
-            }
-            className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
-          >
-            <Pencil size={16} />
-          </button>
-          <button
-            onClick={() => { setDeleteItem(t); setDeleteJustificativa(""); }}
-            className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-red-500/10 hover:text-red-500 transition-colors"
-          >
-            <Trash2 size={16} />
-          </button>
-        </div>
-      </div>
+      <Card>
+        <h3 className="mb-5 text-sm font-semibold text-[var(--foreground)]">
+          Transações
+        </h3>
+        <EmptyState
+          icon={List}
+          title="Nenhuma transação"
+          description="Nenhuma transação registrada neste mês."
+        />
+      </Card>
     );
   }
 
@@ -197,43 +132,146 @@ export function TransactionList({ month, refreshKey, currentMonth, onRefresh }: 
       <Card>
         <h3 className="mb-5 text-sm font-semibold text-[var(--foreground)]">
           Transações
-          {transacoes.length > 0 && (
-            <span className="ml-2 font-normal text-[var(--muted-foreground)]">
-              ({transacoes.length})
-            </span>
-          )}
+          <span className="ml-2 font-normal text-[var(--muted-foreground)]">
+            ({transacoes.length})
+          </span>
         </h3>
-        <div className="flex flex-col gap-3">
-          {receitas.length > 0 && (
-            <div>
-              <p className="mb-2 text-xs font-semibold text-emerald-500 uppercase tracking-wider">
-                Receitas
-              </p>
-              <div className="flex flex-col gap-2">
-                {receitas.map(renderRow)}
-              </div>
-            </div>
-          )}
 
-          {despesas.length > 0 && (
-            <div>
-              <p className="mb-2 text-xs font-semibold text-red-500 uppercase tracking-wider">
-                Despesas
-              </p>
-              <div className="flex flex-col gap-2">
-                {despesas.map(renderRow)}
-              </div>
-            </div>
-          )}
+        <div className="overflow-x-auto">
+          {/* Header */}
+          <div className="hidden sm:grid grid-cols-12 gap-4 px-4 py-2 text-xs font-medium uppercase tracking-wider text-[var(--muted-foreground)]">
+            <div className="col-span-4 lg:col-span-5">Transação</div>
+            <div className="col-span-3 lg:col-span-2">Categoria</div>
+            <div className="col-span-2 hidden lg:block">Data</div>
+            <div className="col-span-3 lg:col-span-2 text-right">Valor</div>
+            <div className="col-span-2 lg:col-span-1" />
+          </div>
 
-          {transacoes.length === 0 && (
-            <EmptyState
-              icon={List}
-              title="Nenhuma transação"
-              description="Nenhuma transação registrada neste mês."
-            />
-          )}
+          <div className="flex flex-col">
+            {paginated.map((t, idx) => (
+              <div
+                key={t.id}
+                className={`grid grid-cols-12 gap-4 items-center px-4 py-3 text-sm transition-colors hover:bg-[var(--muted)]/50 ${
+                  t.status === "pendente" ? "opacity-70" : ""
+                } ${idx < paginated.length - 1 ? "border-b border-[var(--border)]" : ""}`}
+              >
+                {/* Col 1: Icon + Description */}
+                <div className="col-span-4 lg:col-span-5 flex items-center gap-3 min-w-0">
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                      t.tipo === "receita" ? "bg-emerald-500/10" : "bg-red-500/10"
+                    }`}
+                  >
+                    {t.tipo === "receita" ? (
+                      <ArrowUp size={14} className="text-emerald-500" />
+                    ) : (
+                      <ArrowDown size={14} className="text-red-500" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-[var(--foreground)]">
+                      {t.descricao}
+                    </p>
+                    {t.status === "pendente" && (
+                      <span className="rounded bg-yellow-500/10 px-1.5 py-0.5 text-[10px] text-yellow-500 font-medium">
+                        Previsto
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Col 2: Category badge */}
+                <div className="col-span-3 lg:col-span-2">
+                  <span
+                    className="inline-block rounded-full px-2.5 py-0.5 text-xs font-medium"
+                    style={{
+                      backgroundColor: `${t.categoria_cor || "#6366f1"}20`,
+                      color: t.categoria_cor || "#6366f1",
+                    }}
+                  >
+                    {t.categoria_nome}
+                  </span>
+                </div>
+
+                {/* Col 3: Date (hidden on mobile) */}
+                <div className="col-span-2 hidden lg:block text-[var(--muted-foreground)]">
+                  {formatDate(t.data)}
+                </div>
+
+                {/* Col 4: Value + actions */}
+                <div className="col-span-3 lg:col-span-2 flex items-center justify-end gap-1">
+                  <span
+                    className={`shrink-0 font-semibold tabular-nums ${
+                      t.tipo === "receita" ? "text-emerald-500" : "text-red-500"
+                    }`}
+                  >
+                    {t.tipo === "receita" ? "+" : "-"}
+                    {formatCurrency(t.valor)}
+                  </span>
+                </div>
+                <div className="col-span-2 lg:col-span-1 flex items-center justify-end gap-1">
+                  {t.status === "pendente" && (
+                    <button
+                      onClick={() => confirmar(t.id)}
+                      className="cursor-pointer rounded-lg p-2 text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+                      title="Confirmar"
+                    >
+                      <Check size={16} />
+                    </button>
+                  )}
+                  <button
+                    onClick={() =>
+                      setEditItem({
+                        ...t,
+                        categoria_id: t.categoria_id,
+                        descricao: t.descricao,
+                        valor: t.valor,
+                        data: t.data,
+                        tipo: t.tipo,
+                      } as Transacao)
+                    }
+                    className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-[var(--muted)] transition-colors"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={() => { setDeleteItem(t); setDeleteJustificativa(""); }}
+                    className="cursor-pointer rounded-lg p-2 text-[var(--muted-foreground)] hover:bg-red-500/10 hover:text-red-500 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-4 flex items-center justify-between border-t border-[var(--border)] pt-4">
+            <p className="text-xs text-[var(--muted-foreground)]">
+              Página {page} de {totalPages}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page <= 1}
+                className="flex cursor-pointer items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft size={14} />
+                Anterior
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="flex cursor-pointer items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--muted-foreground)] hover:bg-[var(--muted)] hover:text-[var(--foreground)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Próximo
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
       </Card>
 
       <Modal

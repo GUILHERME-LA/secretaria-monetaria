@@ -63,7 +63,7 @@ export function DashboardCards({ receitas, despesas, previstoReceitas = 0, previ
         </Card>
       </motion.div>
 
-      <div className="flex flex-col gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
