@@ -11,7 +11,7 @@ import {
   monthLabel,
 } from "@/lib/utils";
 import { autoCriarRecorrentes } from "@/lib/auto-criar-recorrentes";
-import { generateInsights } from "@/lib/insights-engine";
+import type { Insight } from "@/lib/insights-engine";
 import { useDashboardPrefs, type WidgetKey } from "@/lib/dashboard-prefs";
 import { createClient } from "@/lib/supabase-client";
 import type { User } from "@supabase/supabase-js";
@@ -27,7 +27,6 @@ import { FinancialInsights } from "@/components/FinancialInsights";
 import { FinancialHealth } from "@/components/FinancialHealth";
 import { FinancialCalendar } from "@/components/FinancialCalendar";
 import { MetasDashboard, type Meta } from "@/components/MetasDashboard";
-import { ChatFab } from "@/components/ChatFab";
 import { WelcomeTutorial } from "@/components/WelcomeTutorial";
 import { Modal } from "@/components/ui/Modal";
 import { seedDefaultCategories } from "@/lib/seed-categories";
@@ -72,6 +71,8 @@ export default function DashboardPage() {
   const [eventosCalendario, setEventosCalendario] = useState<
     { id: string; descricao: string; valor: number; data: string; tipo: "receita" | "despesa"; categoria_cor?: string }[]
   >([]);
+  const [insights, setInsights] = useState<Insight[]>([]);
+  const [insightsLoading, setInsightsLoading] = useState(false);
 
   useEffect(() => {
     createClient()
@@ -286,18 +287,33 @@ export default function DashboardPage() {
     loadMetas();
   }, [loadDashboard, loadComparativo, loadCalendar, loadMetas, refreshKey]);
 
+  useEffect(() => {
+    if (!receitas && !despesas) return;
+    setInsightsLoading(true);
+    fetch("/api/insights", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        receitas,
+        despesas,
+        variacaoReceitas,
+        variacaoDespesas,
+        pieData,
+        recentMonths: comparativo,
+      }),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) setInsights(res.data);
+        else setInsights([]);
+      })
+      .catch(() => setInsights([]))
+      .finally(() => setInsightsLoading(false));
+  }, [receitas, despesas, variacaoReceitas, variacaoDespesas, pieData, comparativo]);
+
   function handleRefresh() {
     setRefreshKey((k) => k + 1);
   }
-
-  const insights = generateInsights(
-    receitas,
-    despesas,
-    variacaoReceitas,
-    variacaoDespesas,
-    pieData,
-    comparativo
-  );
 
   const sparklineReceitas = comparativo.map((m) => m.receitas);
   const sparklineDespesas = comparativo.map((m) => m.despesas);
@@ -339,7 +355,7 @@ export default function DashboardPage() {
 
         {prefs.insights && (
           <div className="mt-8">
-            <FinancialInsights insights={insights} />
+            <FinancialInsights insights={insights} loading={insightsLoading} />
           </div>
         )}
 
@@ -405,7 +421,6 @@ export default function DashboardPage() {
         <TransactionList month={month} refreshKey={refreshKey} currentMonth={hoje} onRefresh={handleRefresh} />
       </main>
 
-      <ChatFab onDone={handleRefresh} />
       <WelcomeTutorial />
 
       <Modal open={customizeOpen} onClose={() => setCustomizeOpen(false)} title="Personalizar Dashboard">

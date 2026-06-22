@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Lightbulb } from "lucide-react";
+import { Lightbulb, Loader2 } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { Insight } from "@/lib/insights-engine";
 
 type Props = {
   insights: Insight[];
+  loading?: boolean;
 };
 
 const typeStyles: Record<string, { bg: string; border: string }> = {
@@ -15,7 +16,34 @@ const typeStyles: Record<string, { bg: string; border: string }> = {
   info: { bg: "bg-[var(--accent)]/8", border: "border-[var(--accent)]/20" },
 };
 
-export function FinancialInsights({ insights }: Props) {
+function Skeleton() {
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-[var(--border)] bg-[var(--muted)]/30 px-4 py-3 animate-pulse">
+      <div className="mt-0.5 h-5 w-5 rounded bg-[var(--muted)]" />
+      <div className="flex-1 space-y-2">
+        <div className="h-3 w-1/3 rounded bg-[var(--muted)]" />
+        <div className="h-3 w-2/3 rounded bg-[var(--muted)]" />
+      </div>
+    </div>
+  );
+}
+
+export function FinancialInsights({ insights, loading }: Props) {
+  if (loading) {
+    return (
+      <div>
+        <h3 className="mb-4 text-sm font-semibold text-[var(--foreground)]">
+          Insights
+        </h3>
+        <div className="flex flex-wrap gap-3">
+          <Skeleton />
+          <Skeleton />
+          <Skeleton />
+        </div>
+      </div>
+    );
+  }
+
   if (insights.length === 0) {
     return (
       <EmptyState
