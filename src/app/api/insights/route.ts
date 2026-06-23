@@ -3,7 +3,7 @@ import { createServerSupabase } from "@/lib/supabase-server";
 import { generateInsights } from "@/lib/insights-engine";
 import type { Insight } from "@/lib/insights-engine";
 
-const OLLAMA_CLOUD_URL = "https://ollama.com/api/chat";
+const OLLAMA_CLOUD_URL = "https://api.ollama.com/api/chat";
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen3:8b-cloud";
 
 function buildPrompt(data: {
